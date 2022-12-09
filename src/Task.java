@@ -1,19 +1,18 @@
 import java.util.Objects;
 
 public class Task {
+    protected int id;
     protected String name;
     protected String description;
-    protected int id;
+
     protected String status;
 
-    public Task(String name, String description, int id) {
-        this.name = name;
+    public Task(int id, String name, String description) {
+        this(id, name);
         this.description = description;
-        this.id = id;
-        status = "NEW";
     }
 
-    public Task(String name, int id) {
+    public Task(int id, String name) {
         this.name = name;
         this.id = id;
         this.description = "";
