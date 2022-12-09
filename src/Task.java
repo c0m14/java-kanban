@@ -13,6 +13,13 @@ public class Task {
         status = "NEW";
     }
 
+    public Task(String name, int id) {
+        this.name = name;
+        this.id = id;
+        this.description = "";
+        this.status = "NEW";
+    }
+
     @Override
     public String toString() {
         String result = "Task{" +
