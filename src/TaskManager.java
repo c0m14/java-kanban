@@ -3,15 +3,24 @@ import java.util.HashMap;
 
 public class TaskManager {
     private int idCounter;
-    private HashMap<Integer, Object> allTasks;
+    private HashMap<String, HashMap<Integer, Object>> allItems;
 
     public TaskManager() {
         this.idCounter = 1;
-        this.allTasks = new HashMap<>();
+        this.allItems = new HashMap<>();
     }
 
-    public void createTask(Task task){
-        allTasks.put(idCounter, task);
+    public void createTask(Object anyItem){
+        HashMap<Integer, Object> items;
+        if (anyItem instanceof Task){
+            if (allItems.get("Task") != null){
+                items = allItems.get("Task");
+            } else {
+                items = new HashMap<>();
+            }
+            items.put(idCounter, anyItem);
+            allItems.put("Task", items);
+        }
         idCounter++;
     }
 
@@ -19,22 +28,29 @@ public class TaskManager {
         return idCounter;
     }
 
-    public ArrayList<Object> getAllTasks() {
-        ArrayList<Object> allTasksList = new ArrayList<>();
-        for (Object task : allTasks.values()) {
-            if (task instanceof Task){
-                allTasksList.add(task);
+    public ArrayList<Object> getAllTasks(String itemType) {
+        ArrayList<Object> itemsByChosenType = new ArrayList<>();
+        if (itemType.equals("Task")) {
+            for(Object task : allItems.get(itemType).values()) {
+                itemsByChosenType.add(task);
             }
         }
-        return allTasksList;
+        return itemsByChosenType;
     }
 
-    public void updateTask(Task task, int id) {
-        allTasks.put(id, task);
+    public void updateTask(Object anyItem, int id) {
+        HashMap<Integer, Object> items;
+        if (anyItem instanceof Task) {
+            items = allItems.get("Task");
+            items.put(id, anyItem);
+            allItems.put("Task", items);
+        }
     }
 
-    public void removeTask(int id) {
-        allTasks.remove(id);
+    public void removeItem(Integer id) {
+        for (HashMap<Integer, Object> hashmap : allItems.values()) {
+            hashmap.remove(id);
+        }
     }
 }
 
