@@ -47,10 +47,14 @@ public class TaskManager {
         }
     }
 
-    public void removeItem(Integer id) {
+    public void removeItemById(Integer id) {
         for (HashMap<Integer, Object> hashmap : allItems.values()) {
             hashmap.remove(id);
         }
+    }
+
+    public void removeAllItemsByType (String itemType) {
+        allItems.get(itemType).clear();
     }
 }
 

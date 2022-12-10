@@ -32,7 +32,15 @@ public class Main {
 
         //тест кейс №3: удаление 1 задачи
         System.out.println("\nУдаление одной задачи");
-        manager.removeItem(testTask2.getId());
+        manager.removeItemById(testTask2.getId());
+
+        for (Object task : manager.getAllTasks("Task")) {
+            System.out.println(task);
+        }
+
+        //тест кейс №4: удаление всех задач по типу
+        System.out.println("\nУдаление всех задач по типу");
+        manager.removeAllItemsByType("Task");
 
         for (Object task : manager.getAllTasks("Task")) {
             System.out.println(task);
