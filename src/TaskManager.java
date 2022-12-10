@@ -30,5 +30,9 @@ public class TaskManager {
     public void updateTask(Task task, int id) {
         allTasks.put(id, task);
     }
+
+    public void removeTask(int id) {
+        allTasks.remove(id);
+    }
 }
 
