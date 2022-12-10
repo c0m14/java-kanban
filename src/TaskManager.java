@@ -26,5 +26,9 @@ public class TaskManager {
         }
         return allTasksList;
     }
+
+    public void updateTask(Task task, int id) {
+        allTasks.put(id, task);
+    }
 }
 
