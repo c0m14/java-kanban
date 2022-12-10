@@ -56,5 +56,13 @@ public class TaskManager {
     public void removeAllItemsByType (String itemType) {
         allItems.get(itemType).clear();
     }
+
+    public Object getItemById (Integer id) {
+        Object item = new Object();
+        for (HashMap<Integer, Object> hashmap : allItems.values()) {
+            item = hashmap.get(id);
+        }
+        return item;
+    }
 }
 
