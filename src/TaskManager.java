@@ -10,7 +10,7 @@ public class TaskManager {
         this.allItems = new HashMap<>();
     }
 
-    public void createTask(Object anyItem){
+    public void createItem(Object anyItem){
         HashMap<Integer, Object> items;
         if (anyItem instanceof Task){
             if (allItems.get("Task") != null){
@@ -21,6 +21,24 @@ public class TaskManager {
             items.put(idCounter, anyItem);
             allItems.put("Task", items);
         }
+        if (anyItem instanceof Subtask) {
+            if (allItems.get("Subtask") != null){
+                items = allItems.get("Subtask");
+            } else {
+                items = new HashMap<>();
+            }
+            items.put(idCounter, anyItem);
+            allItems.put("Subtask", items);
+        }
+        if (anyItem instanceof Epic) {
+            if (allItems.get("Epic") != null) {
+                items = allItems.get("Epic");
+            } else {
+                items = new HashMap<>();
+            }
+            items.put(idCounter, anyItem);
+            allItems.put("Epic", items);
+        }
         idCounter++;
     }
 
@@ -30,10 +48,8 @@ public class TaskManager {
 
     public ArrayList<Object> getAllTasks(String itemType) {
         ArrayList<Object> itemsByChosenType = new ArrayList<>();
-        if (itemType.equals("Task")) {
-            for(Object task : allItems.get(itemType).values()) {
-                itemsByChosenType.add(task);
-            }
+        for (Object item : allItems.get(itemType).values()) {
+            itemsByChosenType.add(item);
         }
         return itemsByChosenType;
     }
@@ -60,7 +76,9 @@ public class TaskManager {
     public Object getItemById (Integer id) {
         Object item = new Object();
         for (HashMap<Integer, Object> hashmap : allItems.values()) {
-            item = hashmap.get(id);
+            if (hashmap.get(id) != null) {
+                item = hashmap.get(id);
+            }
         }
         return item;
     }
