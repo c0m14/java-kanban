@@ -41,14 +41,14 @@ public class Task {
     @Override
     public String toString() {
         String result = "Task{" +
-                        "name='" + name + '\'';
+                "id=" + id +
+                ", name='" + name + '\'';
         if (description != null) {
             result = result + ", description.length()='" + description.length() + '\'';
         } else {
             result = result + ", description.length()='null'";
         }
-        result = result + ", id=" + id +
-                            ", status='" + status + '\'' +
+        result = result + ", status='" + status + '\'' +
                             '}';
         return result;
     }
