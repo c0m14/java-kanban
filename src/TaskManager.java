@@ -3,7 +3,7 @@ import java.util.HashMap;
 
 public class TaskManager {
     private int idCounter;
-    private HashMap<Integer, Task> allTasks;
+    private HashMap<Integer, Object> allTasks;
 
     public TaskManager() {
         this.idCounter = 1;
@@ -19,10 +19,12 @@ public class TaskManager {
         return idCounter;
     }
 
-    public ArrayList<Task> getAllTasks() {
-        ArrayList<Task> allTasksList = new ArrayList<>();
-        for (Task task : allTasks.values()) {
-            allTasksList.add(task);
+    public ArrayList<Object> getAllTasks() {
+        ArrayList<Object> allTasksList = new ArrayList<>();
+        for (Object task : allTasks.values()) {
+            if (task instanceof Task){
+                allTasksList.add(task);
+            }
         }
         return allTasksList;
     }

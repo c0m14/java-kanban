@@ -14,7 +14,7 @@ public class Main {
                 "Test task 2 without description");
         manager.createTask(testTask2);
 
-        for (Task task : manager.getAllTasks()) {
+        for (Object task : manager.getAllTasks()) {
             System.out.println(task);
         }
 
@@ -26,7 +26,7 @@ public class Main {
         testTask2.setStatus("SOME_WRONG_STATUS");
         manager.updateTask(testTask2, testTask2.getId());
 
-        for (Task task : manager.getAllTasks()) {
+        for (Object task : manager.getAllTasks()) {
             System.out.println(task);
         }
 
@@ -34,7 +34,7 @@ public class Main {
         System.out.println("\nУдаление одной задачи");
         manager.removeTask(testTask2.getId());
 
-        for (Task task : manager.getAllTasks()) {
+        for (Object task : manager.getAllTasks()) {
             System.out.println(task);
         }
     }
