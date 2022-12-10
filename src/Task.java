@@ -1,15 +1,21 @@
+import java.util.HashSet;
 import java.util.Objects;
 
 public class Task {
     protected int id;
     protected String name;
     protected String description;
-
     protected String status;
+    private HashSet<String> availableStatuses = new HashSet<>();
 
     public Task(int id, String name, String description) {
         this(id, name);
         this.description = description;
+
+        availableStatuses.add("NEW");
+        availableStatuses.add("IN_PROGRESS");
+        availableStatuses.add("DONE");
+
     }
 
     public Task(int id, String name) {
@@ -17,6 +23,19 @@ public class Task {
         this.id = id;
         this.description = "";
         this.status = "NEW";
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setStatus(String status) {
+        if (availableStatuses.contains(status)){
+            this.status = status;
+        } else {
+            System.out.println("Статус отсутствует в списке доступных. Для задачи " + this.name
+                    + " присвоен \"NEW\"");
+        }
     }
 
     @Override
