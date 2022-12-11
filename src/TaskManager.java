@@ -101,20 +101,24 @@ public class TaskManager {
         }
         return epicSubtasks;
     }
-    
+
     private void epicUpdateStatus(Subtask subtask) {
         Epic currEpic = (Epic) getItemById(subtask.getEpicId());
-        for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
-            if (epicSubtask.getStatus().equals("NEW")) {
-                currEpic.setStatus(("NEW"));
-            } else if (epicSubtask.getStatus().equals("DONE")) {
-                currEpic.setStatus(("DONE"));
+        if (getEpicSubtasks(subtask.getEpicId()).isEmpty()) {
+            currEpic.setStatus("NEW");
+        } else {
+            for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
+                if (epicSubtask.getStatus().equals("NEW")) {
+                    currEpic.setStatus(("NEW"));
+                } else if (epicSubtask.getStatus().equals("DONE")) {
+                    currEpic.setStatus(("DONE"));
+                }
             }
-        }
-        for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
-            if (!currEpic.getStatus().equals(epicSubtask.getStatus())) {
-                currEpic.setStatus("IN_PROGRESS");
-                break;
+            for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
+                if (!currEpic.getStatus().equals(epicSubtask.getStatus())) {
+                    currEpic.setStatus("IN_PROGRESS");
+                    break;
+                }
             }
         }
     }
