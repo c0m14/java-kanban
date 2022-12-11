@@ -63,7 +63,7 @@ public class TaskManager {
         }
     }
 
-    public void removeItemById(Integer id) {
+    public void removeItemById(int id) {
         for (HashMap<Integer, Object> hashmap : allItems.values()) {
             hashmap.remove(id);
         }
@@ -73,7 +73,7 @@ public class TaskManager {
         allItems.get(itemType).clear();
     }
 
-    public Object getItemById (Integer id) {
+    public Object getItemById (int id) {
         Object item = new Object();
         for (HashMap<Integer, Object> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {
@@ -81,6 +81,17 @@ public class TaskManager {
             }
         }
         return item;
+    }
+
+    private ArrayList<Subtask> getEpicSubtasks(int epicId) {
+        ArrayList<Subtask> epicSubtasks = new ArrayList<>();
+        for (Object item : allItems.get("Subtask").values()) {
+            Subtask subtask = (Subtask) item;
+            if (subtask.getEpicId() == epicId) {
+                epicSubtasks.add(subtask);
+            }
+        }
+        return epicSubtasks;
     }
 }
 
