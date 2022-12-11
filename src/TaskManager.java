@@ -63,7 +63,7 @@ public class TaskManager {
         }
         if (anyItem instanceof Subtask) {
             Subtask newSubtask = (Subtask) anyItem;
-            epicStatusUpdate(newSubtask);
+            epicUpdateStatus(newSubtask);
 
             items = allItems.get("Subtask");
             items.put(id, anyItem);
@@ -101,35 +101,21 @@ public class TaskManager {
         }
         return epicSubtasks;
     }
-
-    private void epicStatusUpdate (Subtask subtask){
+    
+    private void epicUpdateStatus(Subtask subtask) {
         Epic currEpic = (Epic) getItemById(subtask.getEpicId());
-        switch (subtask.getStatus()) {
-            case "NEW":
-                for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
-                    if (!epicSubtask.getStatus().equals("NEW")) {
-                        currEpic.setStatus("IN_PROGRESS");
-                        break;
-                    } else {
-                        currEpic.setStatus("NEW");
-                    }
-                }
+        for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
+            if (epicSubtask.getStatus().equals("NEW")) {
+                currEpic.setStatus(("NEW"));
+            } else if (epicSubtask.getStatus().equals("DONE")) {
+                currEpic.setStatus(("DONE"));
+            }
+        }
+        for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
+            if (!currEpic.getStatus().equals(epicSubtask.getStatus())) {
+                currEpic.setStatus("IN_PROGRESS");
                 break;
-            case "DONE":
-                currEpic.setStatus("DONE");
-                for (Subtask epicSubtask : getEpicSubtasks(subtask.getEpicId())) {
-                    if (!epicSubtask.getStatus().equals("DONE")) {
-                        currEpic.setStatus("IN_PROGRESS");
-                    }
-                }
-                break;
-            case "IN_PROGRESS":
-                if (!currEpic.getStatus().equals("IN_PROGRESS")){
-                    currEpic.setStatus("IN_PROGRESS");
-                }
-                break;
-            default:
-                System.out.println("Subtask имеет некорректный статус, статус эпика не обновлен");
+            }
         }
     }
 }
