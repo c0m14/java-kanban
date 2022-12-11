@@ -33,9 +33,9 @@ public class Main {
                 "Test subtask 2 for epic 1 with description");
         manager.createItem(testSubtask2);
 
-        testEpic1.addSubtask(testEpic1.getId(), testSubtask1);
+        testEpic1.addSubtask(testSubtask1);
         testSubtask1.setEpicId(testEpic1.getId());
-        testEpic1.addSubtask(testEpic1.getId(), testSubtask2);
+        testEpic1.addSubtask(testSubtask2);
         testSubtask2.setEpicId(testEpic1.getId());
 
         Epic testEpic2 = new Epic(manager.getIdCounter(),
@@ -44,7 +44,7 @@ public class Main {
         Subtask testSubtask3 = new Subtask(manager.getIdCounter(),
                 "Test subtask 3 for epic 2");
         manager.createItem(testSubtask3);
-        testEpic2.addSubtask(testEpic2.getId(), testSubtask3);
+        testEpic2.addSubtask(testSubtask3);
         testSubtask3.setEpicId(testEpic2.getId());
 
         for (Object epic : manager.getAllTasks("Epic")) {
@@ -88,6 +88,20 @@ public class Main {
         manager.updateTask(testSubtask1, testSubtask1.getId());
         System.out.println(testEpic1);
 
+        System.out.println("\nИзменение статуса Subtask (у Epic только 1 Subtask): ");
+        System.out.println("Меняем статус на IN_PROGRESS:");
+        testSubtask3.setStatus("IN_PROGRESS");
+        manager.updateTask(testSubtask3, testSubtask3.getId());
+        System.out.println(testEpic2);
+        System.out.println("Возвращаем NEW:");
+        testSubtask3.setStatus("NEW");
+        manager.updateTask(testSubtask3, testSubtask3.getId());
+        System.out.println(testEpic2);
+        System.out.println("Меняем на DONE:");
+        testSubtask3.setStatus("DONE");
+        manager.updateTask(testSubtask3, testSubtask3.getId());
+        System.out.println(testEpic2);
+
         //тест кейс: удаление 1 задачи
         System.out.println("\nУдаление одной Task");
         manager.removeItemById(testTask2.getId());
@@ -95,6 +109,10 @@ public class Main {
         for (Object task : manager.getAllTasks("Task")) {
             System.out.println(task);
         }
+
+        System.out.println("\nУдаление одной Subtask");
+        manager.removeItemById(testSubtask3.getId());
+        System.out.println(testEpic2);
 
         //тест кейс: удаление всех задач по типу
         System.out.println("\nУдаление всех задач по типу Task");

@@ -73,15 +73,18 @@ public class TaskManager {
     }
 
     public void removeItemById(int id) {
-        int epicId = 0;
         if (getItemById(id) instanceof Subtask) {
-            epicId = ((Subtask) getItemById(id)).getEpicId();
-        }
-        for (HashMap<Integer, Object> hashmap : allItems.values()) {
-            hashmap.remove(id);
-        }
-        if (getItemById(id) instanceof Subtask) {
-            epicUpdateStatus(epicId);
+            Subtask currSubtask = (Subtask) getItemById(id);
+            Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
+            currEpic.deleteSubtask(currSubtask);
+            for (HashMap<Integer, Object> hashmap : allItems.values()) {
+                hashmap.remove(id);
+            }
+            epicUpdateStatus(currEpic.getId());
+        } else {
+            for (HashMap<Integer, Object> hashmap : allItems.values()) {
+                hashmap.remove(id);
+            }
         }
     }
 
