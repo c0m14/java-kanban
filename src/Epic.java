@@ -1,29 +1,32 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Epic extends Task {
-    private HashMap<Integer, ArrayList<Subtask>> epicSubtasks;
+    ArrayList<Subtask> epicSubtasks;
 
     public Epic(int id, String name) {
         super(id, name);
-        this.epicSubtasks = new HashMap<>();
+        this.epicSubtasks = new ArrayList<>();
     }
 
     public Epic(int id, String name, String description) {
         super(id, name, description);
-        this.epicSubtasks = new HashMap<>();
+        this.epicSubtasks = new ArrayList<>();
     }
 
-    public void addSubtask (int id, Subtask subtask){
-        ArrayList<Subtask> linkSubtasks;
-        if (epicSubtasks.get(id) != null) {
-            linkSubtasks = epicSubtasks.get(id);
-        } else {
-            linkSubtasks = new ArrayList<>();
-        }
-        linkSubtasks.add(subtask);
-        epicSubtasks.put(id,linkSubtasks);
+    public void addSubtask(Subtask subtask) {
+        this.epicSubtasks.add(subtask);
+    }
 
+    public void deleteSubtask(Subtask subtask) {
+        Iterator<Subtask> iterator = epicSubtasks.iterator();
+        while (iterator.hasNext()){
+           Subtask currSubtask = iterator.next();
+           if (subtask.getId() == currSubtask.getId()) {
+               iterator.remove();
+           }
+        }
     }
 
     @Override
@@ -38,11 +41,11 @@ public class Epic extends Task {
         }
         result = result +
                 ", status='" + status + '\'';
-        if (epicSubtasks != null) {
-            result = result + ", epicSubtasks={" + epicSubtasks.get(this.id) +
+        if (!epicSubtasks.isEmpty()) {
+            result = result + ", epicSubtasks={" + epicSubtasks +
                     '}';
         } else {
-            result = result + ", epicSubtasks='null'" +
+            result = result + ", epicSubtasks='{empty}'" +
                     '}';
         }
         return result;
