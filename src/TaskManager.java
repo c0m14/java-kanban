@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class TaskManager {
     private int idCounter;
@@ -89,7 +90,23 @@ public class TaskManager {
     }
 
     public void removeAllItemsByType (String itemType) {
-        allItems.get(itemType).clear();
+        if (itemType.equals("Subtask")) {
+            ArrayList<Integer> relatedEpicsId = new ArrayList<>();
+            for (Object subtask : allItems.get(itemType).values()) {
+                Subtask currSubtask = (Subtask) subtask;
+                if (currSubtask.getEpicId() != 0) {
+                    Epic currEpic = (Epic)getItemById(currSubtask.getEpicId());
+                    currEpic.deleteSubtask(currSubtask);
+                    relatedEpicsId.add(currEpic.getId());
+                }
+            }
+            allItems.get(itemType).clear();
+            for (Integer id : relatedEpicsId) {
+                epicUpdateStatus(id);
+            }
+        } else {
+            allItems.get(itemType).clear();
+        }
     }
 
     private Object getItemById (int id) {

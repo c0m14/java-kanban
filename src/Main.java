@@ -114,12 +114,29 @@ public class Main {
         manager.removeItemById(testSubtask3.getId());
         System.out.println(testEpic2);
 
+        System.out.println("\nУдаление Epic");
+        manager.removeItemById(testEpic2.getId());
+        for (Object epic : manager.getAllTasks("Epic")) {
+            System.out.println(epic);
+        }
+
         //тест кейс: удаление всех задач по типу
         System.out.println("\nУдаление всех задач по типу Task");
         manager.removeAllItemsByType("Task");
-
         for (Object task : manager.getAllTasks("Task")) {
             System.out.println(task);
+        }
+
+        System.out.println("\nУдаление всех задач по типу Subtask");
+        manager.removeAllItemsByType("Subtask");
+        for (Object epic : manager.getAllTasks("Epic")) {
+            System.out.println(epic);
+        }
+
+        System.out.println("\nУдаление всех задач по типу Epic");
+        manager.removeAllItemsByType("Epic");
+        for (Object epic : manager.getAllTasks("Epic")) {
+            System.out.println(epic);
         }
     }
 }
