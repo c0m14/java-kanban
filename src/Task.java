@@ -11,11 +11,6 @@ public class Task {
     public Task(int id, String name, String description) {
         this(id, name);
         this.description = description;
-
-        availableStatuses.add("NEW");
-        availableStatuses.add("IN_PROGRESS");
-        availableStatuses.add("DONE");
-
     }
 
     public Task(int id, String name) {
@@ -23,6 +18,10 @@ public class Task {
         this.id = id;
         this.description = "";
         this.status = "NEW";
+
+        availableStatuses.add("NEW");
+        availableStatuses.add("IN_PROGRESS");
+        availableStatuses.add("DONE");
     }
 
     public int getId() {
@@ -36,6 +35,10 @@ public class Task {
             System.out.println("Статус отсутствует в списке доступных. Для задачи " + this.name
                     + " присвоен \"NEW\"");
         }
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     @Override

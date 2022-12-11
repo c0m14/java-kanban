@@ -51,9 +51,11 @@ public class Main {
             System.out.println(epic);
         }
 
-        //тест кейс: получениее задачи по id
+        /*
+        //тест кейс: получениее задачи по id (перед проверкой сделать метод публичным)
         System.out.println("\nПолучение Task по id");
         System.out.println(manager.getItemById(testTask1.getId()));
+         */
 
         //тест кейс: изменение статуса задач
         System.out.println("\nИзменение статуса Task");
@@ -66,6 +68,25 @@ public class Main {
         for (Object task : manager.getAllTasks("Task")) {
             System.out.println(task);
         }
+
+        System.out.println("\nИзменение статуса Subtask: ");
+        testSubtask1.setStatus("IN_PROGRESS");
+        testSubtask2.setStatus("NEW");
+        manager.updateTask(testSubtask1, testSubtask1.getId());
+        manager.updateTask(testSubtask2, testSubtask2.getId());
+        System.out.println(testEpic1);
+        System.out.println("Возвращаем статус NEW Subtask 1: ");
+        testSubtask1.setStatus("NEW");
+        manager.updateTask(testSubtask1, testSubtask1.getId());
+        System.out.println(testEpic1);
+        System.out.println("Проставить статус DONE одной из Subtask: ");
+        testSubtask2.setStatus("DONE");
+        manager.updateTask(testSubtask2, testSubtask2.getId());
+        System.out.println(testEpic1);
+        System.out.println("Все Subtask в статусе DONE :");
+        testSubtask1.setStatus("DONE");
+        manager.updateTask(testSubtask1, testSubtask1.getId());
+        System.out.println(testEpic1);
 
         //тест кейс: удаление 1 задачи
         System.out.println("\nУдаление одной Task");

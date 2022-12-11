@@ -12,7 +12,7 @@ public class TaskManager {
 
     public void createItem(Object anyItem){
         HashMap<Integer, Object> items;
-        if (anyItem instanceof Task){
+        if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)){
             if (allItems.get("Task") != null){
                 items = allItems.get("Task");
             } else {
@@ -56,10 +56,44 @@ public class TaskManager {
 
     public void updateTask(Object anyItem, int id) {
         HashMap<Integer, Object> items;
-        if (anyItem instanceof Task) {
+        if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
             items = allItems.get("Task");
             items.put(id, anyItem);
             allItems.put("Task", items);
+        }
+        if (anyItem instanceof Subtask) {
+            Subtask newSubtask = (Subtask) anyItem;
+            Epic currEpic = (Epic) getItemById(newSubtask.getEpicId());
+                switch (newSubtask.getStatus()) {
+                    case "NEW":
+                        for (Subtask epicSubtask : getEpicSubtasks(newSubtask.getEpicId())) {
+                            if (!epicSubtask.getStatus().equals("NEW")) {
+                                currEpic.setStatus("IN_PROGRESS");
+                                break;
+                            } else {
+                                currEpic.setStatus("NEW");
+                            }
+                        }
+                        break;
+                    case "DONE":
+                        currEpic.setStatus("DONE");
+                        for (Subtask epicSubtask : getEpicSubtasks(newSubtask.getEpicId())) {
+                            if (!epicSubtask.getStatus().equals("DONE")) {
+                                currEpic.setStatus("IN_PROGRESS");
+                            }
+                        }
+                        break;
+                    case "IN_PROGRESS":
+                        if (!currEpic.getStatus().equals("IN_PROGRESS")){
+                            currEpic.setStatus("IN_PROGRESS");
+                        }
+                        break;
+                    default:
+                        System.out.println("Subtask имеет некорректный статус, статус эпика не обновлен");
+                }
+            items = allItems.get("Subtask");
+            items.put(id, anyItem);
+            allItems.put("Subtask", items);
         }
     }
 
@@ -73,7 +107,7 @@ public class TaskManager {
         allItems.get(itemType).clear();
     }
 
-    public Object getItemById (int id) {
+    private Object getItemById (int id) {
         Object item = new Object();
         for (HashMap<Integer, Object> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {
