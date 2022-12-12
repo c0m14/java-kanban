@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 public class TaskManager {
     private int idCounter;
@@ -11,10 +10,10 @@ public class TaskManager {
         this.allItems = new HashMap<>();
     }
 
-    public void createItem(Object anyItem){
+    public void createItem(Object anyItem) {
         HashMap<Integer, Object> items;
-        if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)){
-            if (allItems.get("Task") != null){
+        if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
+            if (allItems.get("Task") != null) {
                 items = allItems.get("Task");
             } else {
                 items = new HashMap<>();
@@ -23,7 +22,7 @@ public class TaskManager {
             allItems.put("Task", items);
         }
         if (anyItem instanceof Subtask) {
-            if (allItems.get("Subtask") != null){
+            if (allItems.get("Subtask") != null) {
                 items = allItems.get("Subtask");
             } else {
                 items = new HashMap<>();
@@ -89,13 +88,13 @@ public class TaskManager {
         }
     }
 
-    public void removeAllItemsByType (String itemType) {
+    public void removeAllItemsByType(String itemType) {
         if (itemType.equals("Subtask")) {
             ArrayList<Integer> relatedEpicsId = new ArrayList<>();
             for (Object subtask : allItems.get(itemType).values()) {
                 Subtask currSubtask = (Subtask) subtask;
                 if (currSubtask.getEpicId() != 0) {
-                    Epic currEpic = (Epic)getItemById(currSubtask.getEpicId());
+                    Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
                     currEpic.deleteSubtask(currSubtask);
                     relatedEpicsId.add(currEpic.getId());
                 }
@@ -109,7 +108,7 @@ public class TaskManager {
         }
     }
 
-    private Object getItemById (int id) {
+    private Object getItemById(int id) {
         Object item = new Object();
         for (HashMap<Integer, Object> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {
