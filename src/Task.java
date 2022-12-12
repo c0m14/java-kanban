@@ -29,7 +29,7 @@ public class Task {
     }
 
     public void setStatus(String status) {
-        if (availableStatuses.contains(status)){
+        if (availableStatuses.contains(status)) {
             this.status = status;
         } else {
             System.out.println("Статус отсутствует в списке доступных. Для задачи " + this.name
@@ -52,14 +52,18 @@ public class Task {
             result = result + ", description.length()='null'";
         }
         result = result + ", status='" + status + '\'' +
-                            '}';
+                '}';
         return result;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Task task = (Task) o;
         return id == task.id && name.equals(task.name) && Objects.equals(description, task.description) && status.equals(task.status);
     }
