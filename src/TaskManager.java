@@ -46,7 +46,7 @@ public class TaskManager {
         return idCounter;
     }
 
-    public ArrayList<Object> getAllTasks(String itemType) {
+    public ArrayList<Object> getAllItemsByType(String itemType) {
         ArrayList<Object> itemsByChosenType = new ArrayList<>();
         for (Object item : allItems.get(itemType).values()) {
             itemsByChosenType.add(item);
