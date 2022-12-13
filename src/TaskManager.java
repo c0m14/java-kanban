@@ -54,7 +54,7 @@ public class TaskManager {
         return itemsByChosenType;
     }
 
-    public void updateTask(Object anyItem, int id) {
+    public void updateItem(Object anyItem, int id) {
         HashMap<Integer, Object> items;
         if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
             items = allItems.get("Task");
