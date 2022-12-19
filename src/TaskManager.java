@@ -10,7 +10,7 @@ public class TaskManager {
         this.allItems = new HashMap<>();
     }
 
-    public void createItem(Object anyItem) {
+    public int createItem(Object anyItem) {
         HashMap<Integer, Object> items;
         if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
             if (allItems.get("Task") != null) {
@@ -39,7 +39,7 @@ public class TaskManager {
             items.put(idCounter, anyItem);
             allItems.put("Epic", items);
         }
-        idCounter++;
+        return idCounter++;
     }
 
     public int getIdCounter() {
