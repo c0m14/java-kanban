@@ -2,10 +2,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class InMemoryTaskManager implements TaskManager{
+public class InMemoryTaskManager <T extends Task> implements TaskManager <T> {
     private static int idCounter = 1;
-    private HashMap<String, HashMap<Integer, Object>> allItems;
-    private List<Task> allItemsHistory;
+    private HashMap<String, HashMap<Integer, T>> allItems;
+    private List<T> allItemsHistory;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
@@ -13,8 +13,8 @@ public class InMemoryTaskManager implements TaskManager{
     }
 
     @Override
-    public int createItem(Object anyItem) {
-        HashMap<Integer, Object> items;
+    public int createItem(T anyItem) {
+        HashMap<Integer, T> items;
         if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
             if (allItems.get("Task") != null) {
                 items = allItems.get("Task");
@@ -51,17 +51,17 @@ public class InMemoryTaskManager implements TaskManager{
     }
 
     @Override
-    public ArrayList<Object> getAllItemsByType(String itemType) {
-        ArrayList<Object> itemsByChosenType = new ArrayList<>();
-        for (Object item : allItems.get(itemType).values()) {
+    public ArrayList<T> getAllItemsByType(String itemType) {
+        ArrayList<T> itemsByChosenType = new ArrayList<>();
+        for (T item : allItems.get(itemType).values()) {
             itemsByChosenType.add(item);
         }
         return itemsByChosenType;
     }
 
     @Override
-    public void updateItem(Object anyItem, int id) {
-        HashMap<Integer, Object> items;
+    public void updateItem(T anyItem, int id) {
+        HashMap<Integer, T> items;
         if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
             items = allItems.get("Task");
             items.put(id, anyItem);
@@ -84,12 +84,12 @@ public class InMemoryTaskManager implements TaskManager{
             Subtask currSubtask = (Subtask) getItemById(id);
             Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
             currEpic.deleteSubtask(currSubtask);
-            for (HashMap<Integer, Object> hashmap : allItems.values()) {
+            for (HashMap<Integer, T> hashmap : allItems.values()) {
                 hashmap.remove(id);
             }
             epicUpdateStatus(currEpic.getId());
         } else {
-            for (HashMap<Integer, Object> hashmap : allItems.values()) {
+            for (HashMap<Integer, T> hashmap : allItems.values()) {
                 hashmap.remove(id);
             }
         }
@@ -117,8 +117,8 @@ public class InMemoryTaskManager implements TaskManager{
     }
 
     @Override
-    public List<Task> getHistory(){
-        List<Task> last10ItemsFromHistory = new ArrayList<>(10);
+    public List<T> getHistory(){
+        List<T> last10ItemsFromHistory = new ArrayList<>(10);
         if (allItemsHistory.size() > 10) {
             for (int i = allItemsHistory.size(); i > (allItemsHistory.size() - 10); i--) {
                 last10ItemsFromHistory.add(allItemsHistory.get(i));
@@ -131,7 +131,7 @@ public class InMemoryTaskManager implements TaskManager{
 
     private Object getItemById(int id) {
         Object item = new Object();
-        for (HashMap<Integer, Object> hashmap : allItems.values()) {
+        for (HashMap<Integer, T> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {
                 item = hashmap.get(id);
             }

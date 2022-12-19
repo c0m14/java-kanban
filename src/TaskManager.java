@@ -1,19 +1,19 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public interface TaskManager {
+public interface TaskManager <T extends Task>{
 
-    int createItem(Object anyItem);
+    int createItem(T anyItem);
 
     int getIdCounter();
 
-    ArrayList<Object> getAllItemsByType(String itemType);
+    ArrayList<T> getAllItemsByType(String itemType);
 
-    void updateItem(Object anyItem, int id);
+    void updateItem(T anyItem, int id);
 
     void removeItemById(int id);
 
     void removeAllItemsByType(String itemType);
 
-    List<Task> getHistory();
+    List<T> getHistory();
 }
