@@ -2,11 +2,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TaskManager {
-    private int idCounter;
+    private static int idCounter = 1;
     private HashMap<String, HashMap<Integer, Object>> allItems;
 
     public TaskManager() {
-        this.idCounter = 1;
         this.allItems = new HashMap<>();
     }
 
@@ -42,7 +41,7 @@ public class TaskManager {
         return idCounter++;
     }
 
-    public int getIdCounter() {
+    public static int getIdCounter() {
         return idCounter;
     }
 
