@@ -1,12 +1,15 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager{
     private static int idCounter = 1;
     private HashMap<String, HashMap<Integer, Object>> allItems;
+    private List<Task> allItemsHistory;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
+        allItemsHistory = new ArrayList<>();
     }
 
     @Override
@@ -111,6 +114,19 @@ public class InMemoryTaskManager implements TaskManager{
         } else {
             allItems.get(itemType).clear();
         }
+    }
+
+    @Override
+    public List<Task> getHistory(){
+        List<Task> last10ItemsFromHistory = new ArrayList<>(10);
+        if (allItemsHistory.size() > 10) {
+            for (int i = allItemsHistory.size(); i > (allItemsHistory.size() - 10); i--) {
+                last10ItemsFromHistory.add(allItemsHistory.get(i));
+            }
+        } else {
+            last10ItemsFromHistory = allItemsHistory;
+        }
+        return last10ItemsFromHistory;
     }
 
     private Object getItemById(int id) {
