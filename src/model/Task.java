@@ -1,4 +1,5 @@
-import java.util.HashSet;
+package model;
+
 import java.util.Objects;
 
 public class Task {
@@ -23,17 +24,17 @@ public class Task {
         return id;
     }
 
-    public void setStatus(Status status) {
-            this.status = status;
-    }
-
     public Status getStatus() {
         return status;
     }
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
-        String result = "Task{" +
+        String result = "model.Task{" +
                 "id=" + id +
                 ", name='" + name + '\'';
         if (description != null) {

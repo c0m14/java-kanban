@@ -1,8 +1,10 @@
+package model;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Epic extends Task {
-    private ArrayList<Subtask> epicSubtasks;
+    private final ArrayList<Subtask> epicSubtasks;
 
     public Epic(int id, String name) {
         super(id, name);
@@ -20,17 +22,17 @@ public class Epic extends Task {
 
     public void deleteSubtask(Subtask subtask) {
         Iterator<Subtask> iterator = epicSubtasks.iterator();
-        while (iterator.hasNext()){
-           Subtask currSubtask = iterator.next();
-           if (subtask.getId() == currSubtask.getId()) {
-               iterator.remove();
-           }
+        while (iterator.hasNext()) {
+            Subtask currSubtask = iterator.next();
+            if (subtask.getId() == currSubtask.getId()) {
+                iterator.remove();
+            }
         }
     }
 
     @Override
     public String toString() {
-        String result = "Epic{" +
+        String result = "model.Epic{" +
                 "id=" + id +
                 ", name='" + name + '\'';
         if (description != null) {

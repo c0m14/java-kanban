@@ -1,11 +1,18 @@
+import managers.HistoryManager;
+import managers.InMemoryTaskManager;
+import model.Epic;
+import model.Status;
+import model.Subtask;
+import model.Task;
+
 public class Main {
 
     public static void main(String[] args) {
         InMemoryTaskManager manager = new InMemoryTaskManager();
 
         //тест кейс: создание задач
-        //Task
-        System.out.println("Добавление Task");
+        //model.Task
+        System.out.println("Добавление model.Task");
         Task testTask1 = new Task(manager.getIdCounter(),
                 "Test task 1 with description",
                 "Some description of the test task 1");
@@ -15,12 +22,12 @@ public class Main {
                 "Test task 2 without description");
         manager.createItem(testTask2);
 
-        for (Object task : manager.getAllItemsByType("Task")) {
+        for (Object task : manager.getAllItemsByType("model.Task")) {
             System.out.println(task);
         }
 
-        //SubTask и Epic
-        System.out.println("\nДобавление Epic и Subtask");
+        //SubTask и model.Epic
+        System.out.println("\nДобавление model.Epic и model.Subtask");
         Epic testEpic1 = new Epic(manager.getIdCounter(),
                 "Test epic 1 with description",
                 "Some description for the test epic 1");
@@ -47,13 +54,13 @@ public class Main {
         testEpic2.addSubtask(testSubtask3);
         testSubtask3.setEpicId(testEpic2.getId());
 
-        for (Object epic : manager.getAllItemsByType("Epic")) {
+        for (Object epic : manager.getAllItemsByType("model.Epic")) {
             System.out.println(epic);
         }
 
 
         //тест кейс: получениее задачи по id
-        System.out.println("\nПолучение Task по id");
+        System.out.println("\nПолучение model.Task по id");
         System.out.println(manager.getItemById(testTask1.getId()));
         System.out.println(manager.getItemById(testTask2.getId()));
         System.out.println(manager.getItemById(testEpic1.getId()));
@@ -77,37 +84,37 @@ public class Main {
         }
 
         //тест кейс: изменение статуса задач
-        System.out.println("\nИзменение статуса Task");
+        System.out.println("\nИзменение статуса model.Task");
         testTask1.setStatus(Status.IN_PROGRESS);
         manager.updateItem(testTask1, testTask1.getId());
 
         testTask2.setStatus(Status.NEW);
         manager.updateItem(testTask2, testTask2.getId());
 
-        for (Object task : manager.getAllItemsByType("Task")) {
+        for (Object task : manager.getAllItemsByType("model.Task")) {
             System.out.println(task);
         }
 
-        System.out.println("\nИзменение статуса Subtask: ");
+        System.out.println("\nИзменение статуса model.Subtask: ");
         testSubtask1.setStatus(Status.IN_PROGRESS);
         testSubtask2.setStatus(Status.NEW);
         manager.updateItem(testSubtask1, testSubtask1.getId());
         manager.updateItem(testSubtask2, testSubtask2.getId());
         System.out.println(testEpic1);
-        System.out.println("Возвращаем статус NEW Subtask 1: ");
+        System.out.println("Возвращаем статус NEW model.Subtask 1: ");
         testSubtask1.setStatus(Status.NEW);
         manager.updateItem(testSubtask1, testSubtask1.getId());
         System.out.println(testEpic1);
-        System.out.println("Проставить статус DONE одной из Subtask: ");
+        System.out.println("Проставить статус DONE одной из model.Subtask: ");
         testSubtask2.setStatus(Status.DONE);
         manager.updateItem(testSubtask2, testSubtask2.getId());
         System.out.println(testEpic1);
-        System.out.println("Все Subtask в статусе DONE :");
+        System.out.println("Все model.Subtask в статусе DONE :");
         testSubtask1.setStatus(Status.DONE);
         manager.updateItem(testSubtask1, testSubtask1.getId());
         System.out.println(testEpic1);
 
-        System.out.println("\nИзменение статуса Subtask (у Epic только 1 Subtask): ");
+        System.out.println("\nИзменение статуса model.Subtask (у model.Epic только 1 model.Subtask): ");
         System.out.println("Меняем статус на IN_PROGRESS:");
         testSubtask3.setStatus(Status.IN_PROGRESS);
         manager.updateItem(testSubtask3, testSubtask3.getId());
@@ -122,39 +129,39 @@ public class Main {
         System.out.println(testEpic2);
 
         //тест кейс: удаление 1 задачи
-        System.out.println("\nУдаление одной Task");
+        System.out.println("\nУдаление одной model.Task");
         manager.removeItemById(testTask2.getId());
 
-        for (Object task : manager.getAllItemsByType("Task")) {
+        for (Object task : manager.getAllItemsByType("model.Task")) {
             System.out.println(task);
         }
 
-        System.out.println("\nУдаление одной Subtask");
+        System.out.println("\nУдаление одной model.Subtask");
         manager.removeItemById(testSubtask3.getId());
         System.out.println(testEpic2);
 
-        System.out.println("\nУдаление Epic");
+        System.out.println("\nУдаление model.Epic");
         manager.removeItemById(testEpic2.getId());
-        for (Object epic : manager.getAllItemsByType("Epic")) {
+        for (Object epic : manager.getAllItemsByType("model.Epic")) {
             System.out.println(epic);
         }
 
         //тест кейс: удаление всех задач по типу
-        System.out.println("\nУдаление всех задач по типу Task");
-        manager.removeAllItemsByType("Task");
-        for (Object task : manager.getAllItemsByType("Task")) {
+        System.out.println("\nУдаление всех задач по типу model.Task");
+        manager.removeAllItemsByType("model.Task");
+        for (Object task : manager.getAllItemsByType("model.Task")) {
             System.out.println(task);
         }
 
-        System.out.println("\nУдаление всех задач по типу Subtask");
-        manager.removeAllItemsByType("Subtask");
-        for (Object epic : manager.getAllItemsByType("Epic")) {
+        System.out.println("\nУдаление всех задач по типу model.Subtask");
+        manager.removeAllItemsByType("model.Subtask");
+        for (Object epic : manager.getAllItemsByType("model.Epic")) {
             System.out.println(epic);
         }
 
-        System.out.println("\nУдаление всех задач по типу Epic");
-        manager.removeAllItemsByType("Epic");
-        for (Object epic : manager.getAllItemsByType("Epic")) {
+        System.out.println("\nУдаление всех задач по типу model.Epic");
+        manager.removeAllItemsByType("model.Epic");
+        for (Object epic : manager.getAllItemsByType("model.Epic")) {
             System.out.println(epic);
         }
     }

@@ -1,7 +1,10 @@
-import java.util.ArrayList;
-import java.util.List;
+package managers;
 
-public interface TaskManager <T extends Task>{
+import model.Task;
+
+import java.util.ArrayList;
+
+public interface TaskManager<T extends Task> {
 
     int createItem(T anyItem);
 
