@@ -155,18 +155,18 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     private void epicUpdateStatus(int epicId) {
         Epic currEpic = (Epic) getItemById(epicId);
         if (getEpicSubtasks(epicId).isEmpty()) {
-            currEpic.setStatus("NEW");
+            currEpic.setStatus(Status.NEW);
         } else {
             for (Subtask epicSubtask : getEpicSubtasks(epicId)) {
-                if (epicSubtask.getStatus().equals("NEW")) {
-                    currEpic.setStatus(("NEW"));
-                } else if (epicSubtask.getStatus().equals("DONE")) {
-                    currEpic.setStatus(("DONE"));
+                if (epicSubtask.getStatus().equals(Status.NEW)) {
+                    currEpic.setStatus((Status.NEW));
+                } else if (epicSubtask.getStatus().equals(Status.DONE)) {
+                    currEpic.setStatus((Status.DONE));
                 }
             }
             for (Subtask epicSubtask : getEpicSubtasks(epicId)) {
                 if (!currEpic.getStatus().equals(epicSubtask.getStatus())) {
-                    currEpic.setStatus("IN_PROGRESS");
+                    currEpic.setStatus(Status.IN_PROGRESS);
                     break;
                 }
             }

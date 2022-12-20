@@ -5,8 +5,7 @@ public class Task {
     protected int id;
     protected String name;
     protected String description;
-    protected String status;
-    private HashSet<String> availableStatuses = new HashSet<>();
+    protected Status status;
 
     public Task(int id, String name, String description) {
         this(id, name);
@@ -17,27 +16,18 @@ public class Task {
         this.name = name;
         this.id = id;
         this.description = "";
-        this.status = "NEW";
-
-        availableStatuses.add("NEW");
-        availableStatuses.add("IN_PROGRESS");
-        availableStatuses.add("DONE");
+        this.status = Status.NEW;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setStatus(String status) {
-        if (availableStatuses.contains(status)) {
+    public void setStatus(Status status) {
             this.status = status;
-        } else {
-            System.out.println("Статус отсутствует в списке доступных. Для задачи " + this.name
-                    + " присвоен \"NEW\"");
-        }
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 

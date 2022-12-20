@@ -77,10 +77,10 @@ public class Main {
 
         //тест кейс: изменение статуса задач
         System.out.println("\nИзменение статуса Task");
-        testTask1.setStatus("IN_PROGRESS");
+        testTask1.setStatus(Status.IN_PROGRESS);
         manager.updateItem(testTask1, testTask1.getId());
 
-        testTask2.setStatus("SOME_WRONG_STATUS");
+        testTask2.setStatus(Status.NEW);
         manager.updateItem(testTask2, testTask2.getId());
 
         for (Object task : manager.getAllItemsByType("Task")) {
@@ -88,35 +88,35 @@ public class Main {
         }
 
         System.out.println("\nИзменение статуса Subtask: ");
-        testSubtask1.setStatus("IN_PROGRESS");
-        testSubtask2.setStatus("NEW");
+        testSubtask1.setStatus(Status.IN_PROGRESS);
+        testSubtask2.setStatus(Status.NEW);
         manager.updateItem(testSubtask1, testSubtask1.getId());
         manager.updateItem(testSubtask2, testSubtask2.getId());
         System.out.println(testEpic1);
         System.out.println("Возвращаем статус NEW Subtask 1: ");
-        testSubtask1.setStatus("NEW");
+        testSubtask1.setStatus(Status.NEW);
         manager.updateItem(testSubtask1, testSubtask1.getId());
         System.out.println(testEpic1);
         System.out.println("Проставить статус DONE одной из Subtask: ");
-        testSubtask2.setStatus("DONE");
+        testSubtask2.setStatus(Status.DONE);
         manager.updateItem(testSubtask2, testSubtask2.getId());
         System.out.println(testEpic1);
         System.out.println("Все Subtask в статусе DONE :");
-        testSubtask1.setStatus("DONE");
+        testSubtask1.setStatus(Status.DONE);
         manager.updateItem(testSubtask1, testSubtask1.getId());
         System.out.println(testEpic1);
 
         System.out.println("\nИзменение статуса Subtask (у Epic только 1 Subtask): ");
         System.out.println("Меняем статус на IN_PROGRESS:");
-        testSubtask3.setStatus("IN_PROGRESS");
+        testSubtask3.setStatus(Status.IN_PROGRESS);
         manager.updateItem(testSubtask3, testSubtask3.getId());
         System.out.println(testEpic2);
         System.out.println("Возвращаем NEW:");
-        testSubtask3.setStatus("NEW");
+        testSubtask3.setStatus(Status.NEW);
         manager.updateItem(testSubtask3, testSubtask3.getId());
         System.out.println(testEpic2);
         System.out.println("Меняем на DONE:");
-        testSubtask3.setStatus("DONE");
+        testSubtask3.setStatus(Status.DONE);
         manager.updateItem(testSubtask3, testSubtask3.getId());
         System.out.println(testEpic2);
 
