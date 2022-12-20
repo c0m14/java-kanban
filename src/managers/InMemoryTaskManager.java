@@ -1,23 +1,17 @@
 package managers;
 
-import model.Epic;
-import model.Status;
-import model.Subtask;
-import model.Task;
+import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     private static int idCounter = 1;
-    private final HashMap<String, HashMap<Integer, T>> allItems;
-    private final List<T> allItemsHistory;
+    private final HashMap<ItemType, HashMap<Integer, T>> allItems;
     private final HistoryManager<T> historyManager;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
-        this.allItemsHistory = new ArrayList<>();
         this.historyManager = Managers.getDefaultHistory();
     }
 
@@ -29,31 +23,31 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     public int createItem(T anyItem) {
         HashMap<Integer, T> items;
         if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
-            if (allItems.get("model.Task") != null) {
-                items = allItems.get("model.Task");
+            if (allItems.get(ItemType.TASK) != null) {
+                items = allItems.get(ItemType.TASK);
             } else {
                 items = new HashMap<>();
             }
             items.put(idCounter, anyItem);
-            allItems.put("model.Task", items);
+            allItems.put(ItemType.TASK, items);
         }
         if (anyItem instanceof Subtask) {
-            if (allItems.get("model.Subtask") != null) {
-                items = allItems.get("model.Subtask");
+            if (allItems.get(ItemType.SUBTASK) != null) {
+                items = allItems.get(ItemType.SUBTASK);
             } else {
                 items = new HashMap<>();
             }
             items.put(idCounter, anyItem);
-            allItems.put("model.Subtask", items);
+            allItems.put(ItemType.SUBTASK, items);
         }
         if (anyItem instanceof Epic) {
-            if (allItems.get("model.Epic") != null) {
-                items = allItems.get("model.Epic");
+            if (allItems.get(ItemType.EPIC) != null) {
+                items = allItems.get(ItemType.EPIC);
             } else {
                 items = new HashMap<>();
             }
             items.put(idCounter, anyItem);
-            allItems.put("model.Epic", items);
+            allItems.put(ItemType.EPIC, items);
         }
         return idCounter++;
     }
@@ -64,7 +58,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     }
 
     @Override
-    public ArrayList<T> getAllItemsByType(String itemType) {
+    public ArrayList<T> getAllItemsByType(ItemType itemType) {
         ArrayList<T> itemsByChosenType = new ArrayList<>();
         for (T item : allItems.get(itemType).values()) {
             itemsByChosenType.add(item);
@@ -76,18 +70,18 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     public void updateItem(T anyItem, int id) {
         HashMap<Integer, T> items;
         if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
-            items = allItems.get("model.Task");
+            items = allItems.get(ItemType.TASK);
             items.put(id, anyItem);
-            allItems.put("model.Task", items);
+            allItems.put(ItemType.TASK, items);
         }
         if (anyItem instanceof Subtask) {
             Subtask newSubtask = (Subtask) anyItem;
             int epicId = newSubtask.getEpicId();
             epicUpdateStatus(epicId);
 
-            items = allItems.get("model.Subtask");
+            items = allItems.get(ItemType.SUBTASK);
             items.put(id, anyItem);
-            allItems.put("model.Subtask", items);
+            allItems.put(ItemType.SUBTASK, items);
         }
     }
 
@@ -109,8 +103,8 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     }
 
     @Override
-    public void removeAllItemsByType(String itemType) {
-        if (itemType.equals("model.Subtask")) {
+    public void removeAllItemsByType(ItemType itemType) {
+        if (itemType.equals(ItemType.SUBTASK)) {
             ArrayList<Integer> relatedEpicsId = new ArrayList<>();
             for (Object subtask : allItems.get(itemType).values()) {
                 Subtask currSubtask = (Subtask) subtask;
@@ -142,7 +136,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
 
     private ArrayList<Subtask> getEpicSubtasks(int epicId) {
         ArrayList<Subtask> epicSubtasks = new ArrayList<>();
-        for (Object item : allItems.get("model.Subtask").values()) {
+        for (Object item : allItems.get(ItemType.SUBTASK).values()) {
             Subtask subtask = (Subtask) item;
             if (subtask.getEpicId() == epicId) {
                 epicSubtasks.add(subtask);

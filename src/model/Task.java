@@ -34,7 +34,7 @@ public class Task {
 
     @Override
     public String toString() {
-        String result = "model.Task{" +
+        String result = "Task{" +
                 "id=" + id +
                 ", name='" + name + '\'';
         if (description != null) {

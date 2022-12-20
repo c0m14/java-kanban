@@ -1,5 +1,6 @@
 package managers;
 
+import model.ItemType;
 import model.Task;
 
 import java.util.ArrayList;
@@ -10,11 +11,11 @@ public interface TaskManager<T extends Task> {
 
     int getIdCounter();
 
-    ArrayList<T> getAllItemsByType(String itemType);
+    ArrayList<T> getAllItemsByType(ItemType itemType);
 
     void updateItem(T anyItem, int id);
 
     void removeItemById(int id);
 
-    void removeAllItemsByType(String itemType);
+    void removeAllItemsByType(ItemType itemType);
 }

@@ -23,7 +23,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        String result = "model.Subtask{" +
+        String result = "Subtask{" +
                 "id=" + id +
                 ", name='" + name + '\'';
         if (description != null) {
