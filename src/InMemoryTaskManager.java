@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class InMemoryTaskManager <T extends Task> implements TaskManager <T> {
+public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     private static int idCounter = 1;
     private HashMap<String, HashMap<Integer, T>> allItems;
     private List<T> allItemsHistory;
@@ -117,26 +117,29 @@ public class InMemoryTaskManager <T extends Task> implements TaskManager <T> {
     }
 
     @Override
-    public List<T> getHistory(){
-        List<T> last10ItemsFromHistory = new ArrayList<>(10);
-        if (allItemsHistory.size() > 10) {
-            for (int i = allItemsHistory.size(); i > (allItemsHistory.size() - 10); i--) {
-                last10ItemsFromHistory.add(allItemsHistory.get(i));
-            }
-        } else {
-            last10ItemsFromHistory = allItemsHistory;
-        }
-        return last10ItemsFromHistory;
+    public List<T> getHistory() {
+        return allItemsHistory;
     }
 
-    private Object getItemById(int id) {
-        Object item = new Object();
+    public T getItemById(int id) {
+        T item = null;
         for (HashMap<Integer, T> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {
                 item = hashmap.get(id);
             }
         }
+        addHistory(item);
         return item;
+    }
+
+    private void addHistory(T anyItem){
+        if (allItemsHistory.size() < 10) {
+            allItemsHistory.add(anyItem);
+        }
+        else {
+            allItemsHistory.remove(0);
+            allItemsHistory.add(anyItem);
+        }
     }
 
     private ArrayList<Subtask> getEpicSubtasks(int epicId) {
