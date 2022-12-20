@@ -132,11 +132,10 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
         return item;
     }
 
-    private void addHistory(T anyItem){
+    private void addHistory(T anyItem) {
         if (allItemsHistory.size() < 10) {
             allItemsHistory.add(anyItem);
-        }
-        else {
+        } else {
             allItemsHistory.remove(0);
             allItemsHistory.add(anyItem);
         }
