@@ -6,10 +6,16 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     private static int idCounter = 1;
     private HashMap<String, HashMap<Integer, T>> allItems;
     private List<T> allItemsHistory;
+    private HistoryManager<T> historyManager;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
-        allItemsHistory = new ArrayList<>();
+        this.allItemsHistory = new ArrayList<>();
+        this.historyManager = Managers.getDefaultHistory();
+    }
+
+    public HistoryManager<T> getHistoryManager() {
+        return historyManager;
     }
 
     @Override
@@ -116,11 +122,6 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
         }
     }
 
-    @Override
-    public List<T> getHistory() {
-        return allItemsHistory;
-    }
-
     public T getItemById(int id) {
         T item = null;
         for (HashMap<Integer, T> hashmap : allItems.values()) {
@@ -128,17 +129,8 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
                 item = hashmap.get(id);
             }
         }
-        addHistory(item);
+        historyManager.add(item);
         return item;
-    }
-
-    private void addHistory(T anyItem) {
-        if (allItemsHistory.size() < 10) {
-            allItemsHistory.add(anyItem);
-        } else {
-            allItemsHistory.remove(0);
-            allItemsHistory.add(anyItem);
-        }
     }
 
     private ArrayList<Subtask> getEpicSubtasks(int epicId) {

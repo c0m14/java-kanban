@@ -14,6 +14,4 @@ public interface TaskManager <T extends Task>{
     void removeItemById(int id);
 
     void removeAllItemsByType(String itemType);
-
-    List<T> getHistory();
 }

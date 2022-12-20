@@ -62,7 +62,8 @@ public class Main {
 
         //тест кейс: получение истории просмотра задач (меньше 10)
         System.out.println("\nПолучение истории (меньше 10 записей)");
-        for (Object o : manager.getHistory()) {
+        HistoryManager historyManager = manager.getHistoryManager();
+        for (Object o : historyManager.getHistory()) {
             System.out.println(o);
         }
 
@@ -71,7 +72,7 @@ public class Main {
         for (int i = 0; i < 10; i++) {
             manager.getItemById(testTask1.getId());
         }
-        for (Object o : manager.getHistory()) {
+        for (Object o : historyManager.getHistory()) {
             System.out.println(o);
         }
 
