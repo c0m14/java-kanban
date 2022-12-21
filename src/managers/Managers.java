@@ -1,10 +1,13 @@
 package managers;
 
-public abstract class Managers implements TaskManager {
+public class Managers {
 
     static InMemoryHistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager<>();
     }
 
-    abstract TaskManager getDefault();
+    TaskManager getDefault() {
+        TaskManager defaultManager = new InMemoryTaskManager<>();
+        return defaultManager;
+    }
 }
