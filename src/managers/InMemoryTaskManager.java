@@ -90,7 +90,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
         if (getItemById(id) instanceof Subtask) {
             Subtask currSubtask = (Subtask) getItemById(id);
             Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
-            currEpic.deleteSubtask(currSubtask);
+            currEpic.deleteSubtaskById(id);
             for (HashMap<Integer, T> hashmap : allItems.values()) {
                 hashmap.remove(id);
             }
@@ -106,11 +106,11 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     public void removeAllItemsByType(ItemType itemType) {
         if (itemType.equals(ItemType.SUBTASK)) {
             ArrayList<Integer> relatedEpicsId = new ArrayList<>();
-            for (Object subtask : allItems.get(itemType).values()) {
+            for (T subtask : allItems.get(itemType).values()) {
                 Subtask currSubtask = (Subtask) subtask;
                 if (currSubtask.getEpicId() != 0) {
                     Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
-                    currEpic.deleteSubtask(currSubtask);
+                    currEpic.deleteSubtaskById(currSubtask.getId());
                     relatedEpicsId.add(currEpic.getId());
                 }
             }
