@@ -22,7 +22,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     @Override
     public int createItem(T anyItem) {
         HashMap<Integer, T> items;
-        if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
+        if (anyItem.getClass() == Task.class) {
             if (allItems.get(ItemType.TASK) != null) {
                 items = allItems.get(ItemType.TASK);
             } else {
@@ -31,7 +31,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
             items.put(idCounter, anyItem);
             allItems.put(ItemType.TASK, items);
         }
-        if (anyItem instanceof Subtask) {
+        if (anyItem.getClass() == Subtask.class) {
             if (allItems.get(ItemType.SUBTASK) != null) {
                 items = allItems.get(ItemType.SUBTASK);
             } else {
@@ -40,7 +40,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
             items.put(idCounter, anyItem);
             allItems.put(ItemType.SUBTASK, items);
         }
-        if (anyItem instanceof Epic) {
+        if (anyItem.getClass() == Epic.class) {
             if (allItems.get(ItemType.EPIC) != null) {
                 items = allItems.get(ItemType.EPIC);
             } else {
@@ -69,12 +69,12 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     @Override
     public void updateItem(T anyItem, int id) {
         HashMap<Integer, T> items;
-        if (anyItem instanceof Task && !(anyItem instanceof Subtask) && !(anyItem instanceof Epic)) {
+        if (anyItem.getClass() == Task.class) {
             items = allItems.get(ItemType.TASK);
             items.put(id, anyItem);
             allItems.put(ItemType.TASK, items);
         }
-        if (anyItem instanceof Subtask) {
+        if (anyItem.getClass() == Subtask.class) {
             Subtask newSubtask = (Subtask) anyItem;
             int epicId = newSubtask.getEpicId();
             epicUpdateStatus(epicId);
@@ -87,7 +87,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
 
     @Override
     public void removeItemById(int id) {
-        if (getItemById(id) instanceof Subtask) {
+        if (getItemById(id).getClass() == Subtask.class) {
             Subtask currSubtask = (Subtask) getItemById(id);
             Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
             currEpic.deleteSubtaskById(id);
