@@ -1,33 +1,27 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 public class Epic extends Task {
-    private final ArrayList<Subtask> epicSubtasks;
+    private final List<Integer> epicSubtaskIds;
 
     public Epic(int id, String name) {
         super(id, name);
-        this.epicSubtasks = new ArrayList<>();
+        this.epicSubtaskIds = new ArrayList<>();
     }
 
     public Epic(int id, String name, String description) {
         super(id, name, description);
-        this.epicSubtasks = new ArrayList<>();
+        this.epicSubtaskIds = new ArrayList<>();
     }
 
     public void addSubtask(Subtask subtask) {
-        this.epicSubtasks.add(subtask);
+        this.epicSubtaskIds.add(subtask.getId());
     }
 
-    public void deleteSubtask(Subtask subtask) {
-        Iterator<Subtask> iterator = epicSubtasks.iterator();
-        while (iterator.hasNext()) {
-            Subtask currSubtask = iterator.next();
-            if (subtask.getId() == currSubtask.getId()) {
-                iterator.remove();
-            }
-        }
+    public void deleteSubtaskById(Integer id) {
+        epicSubtaskIds.remove(id);
     }
 
     @Override
@@ -42,11 +36,11 @@ public class Epic extends Task {
         }
         result = result +
                 ", status='" + status + '\'';
-        if (!epicSubtasks.isEmpty()) {
-            result = result + ", epicSubtasks={" + epicSubtasks +
+        if (!epicSubtaskIds.isEmpty()) {
+            result = result + ", epicSubtaskIds={" + epicSubtaskIds +
                     '}';
         } else {
-            result = result + ", epicSubtasks='{empty}'" +
+            result = result + ", epicSubtaskIds='{empty}'" +
                     '}';
         }
         return result;
