@@ -39,6 +39,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
             }
             items.put(idCounter, anyItem);
             allItems.put(ItemType.SUBTASK, items);
+            epicUpdateStatus(((Subtask) anyItem).getEpicId());
         }
         if (anyItem.getClass() == Epic.class) {
             if (allItems.get(ItemType.EPIC) != null) {
