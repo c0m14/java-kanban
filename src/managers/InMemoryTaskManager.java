@@ -101,6 +101,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
                 hashmap.remove(id);
             }
         }
+        historyManager.remove(id);
     }
 
     @Override
@@ -114,12 +115,16 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
                     currEpic.deleteSubtaskById(currSubtask.getId());
                     relatedEpicsId.add(currEpic.getId());
                 }
+                historyManager.remove(currSubtask.getId());
             }
             allItems.get(itemType).clear();
             for (Integer id : relatedEpicsId) {
                 epicUpdateStatus(id);
             }
         } else {
+            for (Integer itemId : allItems.get(itemType).keySet()) {
+                historyManager.remove(itemId);
+            }
             allItems.get(itemType).clear();
         }
     }

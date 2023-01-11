@@ -27,4 +27,9 @@ public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T>
     public List<T> getHistory() {
         return allItemsHistory;
     }
+
+    @Override
+    public void remove(int anyItemId) {
+
+    }
 }
