@@ -4,6 +4,7 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     private static int idCounter = 1;
@@ -39,7 +40,9 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
             }
             items.put(idCounter, anyItem);
             allItems.put(ItemType.SUBTASK, items);
-            epicUpdateStatus(((Subtask) anyItem).getEpicId());
+            if (((Subtask) anyItem).getEpicId() != 0) {
+                epicUpdateStatus(((Subtask) anyItem).getEpicId());
+            }
         }
         if (anyItem.getClass() == Epic.class) {
             if (allItems.get(ItemType.EPIC) != null) {
@@ -96,6 +99,16 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
                 hashmap.remove(id);
             }
             epicUpdateStatus(currEpic.getId());
+        } else if (getItemById(id).getClass() == Epic.class) {
+            Epic currEpic = (Epic) getItemById(id);
+            List<Integer> currEpicSubtasksIds = new ArrayList<>(currEpic.getEpicSubtaskIds());
+            for (Integer epicSubtaskId : currEpicSubtasksIds) {
+                allItems.remove(epicSubtaskId);
+                historyManager.remove(epicSubtaskId);
+            }
+            for (HashMap<Integer, T> hashmap : allItems.values()) {
+                hashmap.remove(id);
+            }
         } else {
             for (HashMap<Integer, T> hashmap : allItems.values()) {
                 hashmap.remove(id);

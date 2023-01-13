@@ -1,10 +1,173 @@
 import managers.HistoryManager;
 import managers.InMemoryTaskManager;
+import managers.Managers;
+import managers.TaskManager;
 import model.*;
+
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+
+
+        System.out.println("Выбор сценария тестирования:");
+        System.out.println("1 - Тестирование нового функционала");
+        System.out.println("2 - Регресс-тесты");
+        choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                initiateNewFeaturesTests();
+                break;
+            case 2:
+                initiateRegress();
+                break;
+        }
+
+        scanner.close();
+    }
+
+    private static void initiateNewFeaturesTests() {
+        TaskManager<Task> taskManager = Managers.getDefault();
+        InMemoryTaskManager taskManager2 = (InMemoryTaskManager) taskManager;
+        HistoryManager<Task> historyManager = taskManager2.getHistoryManager();
+
+        //Подготовка данных для тестирования
+        Task testTask1 = new Task(taskManager.getIdCounter(),
+                "Test task N1");
+        taskManager.createItem(testTask1);
+
+        Task testTask2 = new Task(taskManager.getIdCounter(),
+                "Test task N2");
+        taskManager.createItem(testTask2);
+
+        Epic testEpicWithSubtasks = new Epic(taskManager.getIdCounter(),
+                "Test Epic with 3 subtasks");
+        taskManager.createItem(testEpicWithSubtasks);
+
+        Subtask testSubtask1 = new Subtask(taskManager.getIdCounter(),
+                "Test Subtask N1");
+        taskManager.createItem(testSubtask1);
+
+        Subtask testSubtask2 = new Subtask(taskManager.getIdCounter(),
+                "Test Subtask N2");
+        taskManager.createItem(testSubtask2);
+
+        Subtask testSubtask3 = new Subtask(taskManager.getIdCounter(),
+                "Test Subtask N3");
+        taskManager.createItem(testSubtask3);
+
+        testEpicWithSubtasks.addSubtask(testSubtask1);
+        testSubtask1.setEpicId(testEpicWithSubtasks.getId());
+
+        testEpicWithSubtasks.addSubtask(testSubtask2);
+        testSubtask2.setEpicId(testEpicWithSubtasks.getId());
+
+        testEpicWithSubtasks.addSubtask(testSubtask3);
+        testSubtask3.setEpicId(testEpicWithSubtasks.getId());
+
+
+        Epic testEmptyEpic = new Epic(taskManager.getIdCounter(),
+                "Test empty Epic");
+        taskManager.createItem(testEmptyEpic);
+
+        System.out.println("Тест добавления записей: новых и дублирующих\n");
+        System.out.println("New record:" + testTask1);
+        taskManager.getItemById(testTask1.getId());
+        System.out.println("История:");
+        for (Object o : historyManager.getHistory()) {
+            System.out.println(o);
+        }
+        System.out.println();
+
+        System.out.println("New record:" + testEmptyEpic);
+        taskManager.getItemById(testEmptyEpic.getId());
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("New record:" + testSubtask2);
+        taskManager.getItemById(testSubtask2.getId());
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("Duplicate record:" + testEmptyEpic);
+        taskManager.getItemById(testEmptyEpic.getId());
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("New record:" + testSubtask3);
+        taskManager.getItemById(testSubtask3.getId());
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("Duplicate record:" + testTask2);
+        taskManager.getItemById(testTask2.getId());
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("Duplicate record:" + testTask1);
+        taskManager.getItemById(testTask1.getId());
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("New record:" + testEpicWithSubtasks);
+        taskManager.getItemById(testEpicWithSubtasks.getId());
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("Тест удаления 1 задачи. Head списка (Subtask с id = 5)");
+        taskManager.removeItemById(5);
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("Тест удаления 1 задачи. Середина списка (Task с id = 1)");
+        taskManager.removeItemById(1);
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+        System.out.println("Тест удаления 1 Epic (id = 3) c  Subtask-ами + Tail списка");
+        taskManager.removeItemById(3);
+        System.out.println("История:");
+        for (Task t : historyManager.getHistory()) {
+            System.out.println(t);
+        }
+        System.out.println();
+
+    }
+
+    private static void initiateRegress() {
+
         InMemoryTaskManager manager = new InMemoryTaskManager();
 
         //тест кейс: создание задач
@@ -56,7 +219,7 @@ public class Main {
         }
 
 
-        //тест кейс: получениее задачи по id
+        //тест кейс: получение задачи по id
         System.out.println("\nПолучение Task по id");
         System.out.println(manager.getItemById(testTask1.getId()));
         System.out.println(manager.getItemById(testTask2.getId()));
