@@ -20,13 +20,15 @@ public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T>
 
     @Override
     public void add(T anyItem) {
-        Map<Integer, HistoryRecord<T>> taskIdMap = historyList.getTaskIdMap();
+        if (anyItem != null) {
+            Map<Integer, HistoryRecord<T>> taskIdMap = historyList.getTaskIdMap();
 
-        if (taskIdMap.keySet() != null && taskIdMap.keySet().contains(anyItem.getId())) {
-            HistoryRecord<T> oldHistoryRecord = taskIdMap.get(anyItem.getId());
-            historyList.removeNode(oldHistoryRecord);
+            if (taskIdMap.keySet() != null && taskIdMap.keySet().contains(anyItem.getId())) {
+                HistoryRecord<T> oldHistoryRecord = taskIdMap.get(anyItem.getId());
+                historyList.removeNode(oldHistoryRecord);
+            }
+            historyList.linkLast(anyItem);
         }
-        historyList.linkLast(anyItem);
     }
 
     @Override
