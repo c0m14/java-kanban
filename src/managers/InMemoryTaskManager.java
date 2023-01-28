@@ -4,6 +4,7 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
@@ -183,6 +184,21 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
                 }
             }
         }
+    }
+
+    protected ArrayList<Task> getAllItemsOfAllTypes() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        for (HashMap<Integer, T> entrySet: allItems.values()) {
+            for (Task task : entrySet.values()) {
+                tasks.add(task);
+            }
+        }
+        return tasks;
+    }
+
+    public void addSubtask (Subtask subtask, Epic epic) {
+        epic.addSubtask(subtask);
+        subtask.setEpicId(epic.getId());
     }
 }
 
