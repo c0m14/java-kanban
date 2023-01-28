@@ -4,13 +4,12 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
     private static int idCounter = 1;
     private final HashMap<ItemType, HashMap<Integer, T>> allItems;
-    private final HistoryManager<T> historyManager;
+    protected final HistoryManager<T> historyManager;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();

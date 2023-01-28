@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     Path backupFilePath;
@@ -15,10 +16,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager(Path backupFilePath) {
         super();
         this.backupFilePath = backupFilePath;
+
     }
 
     public static void main(String[] args) {
-        Path autosaveFile = Paths.get("/Users/nikkomochkov/Documents/Coding/dev/java-kanban/project_files/autosave.txt");
+
+        Path autosaveFile = Paths.get("project_files/autosave.txt");
 
         try {
             if (Files.exists(autosaveFile)) {
@@ -54,6 +57,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         fileManager.addSubtask(testSubtask1, testEpic1);
         fileManager.addSubtask(testSubtask2, testEpic1);
 
+
+        //Запись в историю
+        fileManager.getItemById(testTask1.getId());
+        fileManager.getItemById(testEpic1.getId());
+        fileManager.getItemById((testSubtask1.getId()));
+        fileManager.getItemById(testTask1.getId());
+
     }
 
     private void save() throws ManagerSaveException {
@@ -65,6 +75,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             for (Object task : super.getAllItemsOfAllTypes()) {
                 fileWriter.write(toString((Task) task));
             }
+            fileWriter.write("\n");
+            fileWriter.write(historyToString(historyManager));
         } catch (IOException e) {
             throw new ManagerSaveException("Произошла ошибка при записи в файл");
         }
@@ -87,10 +99,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             Subtask thisTask = (Subtask) task;
             backupLineBuilder.append("," + thisTask.getEpicId() + "\n");
         } else {
-            backupLineBuilder.append(", \n");
+            backupLineBuilder.append(", " + "\n");
         }
 
         return backupLineBuilder.toString();
+    }
+
+    public static String historyToString(HistoryManager <Task> historyManager) {
+        StringBuilder historyIdBuilder = new StringBuilder();
+        List<Task> historyList = historyManager.getHistory();
+        for (int i = 0; i < historyList.size(); i++) {
+            if (i < historyList.size() - 1) {
+                historyIdBuilder.append(historyList.get(i).getId() + ",");
+            }else {
+                historyIdBuilder.append(historyList.get(i).getId());
+            }
+        }
+
+
+        return historyIdBuilder.toString();
     }
 
     @Override
