@@ -7,10 +7,12 @@ public class Task {
     protected String name;
     protected String description;
     protected Status status;
+    protected ItemType itemType;
 
     public Task(int id, String name, String description) {
         this(id, name);
         this.description = description;
+        this.itemType = ItemType.TASK;
     }
 
     public Task(int id, String name) {
@@ -18,6 +20,18 @@ public class Task {
         this.id = id;
         this.description = "";
         this.status = Status.NEW;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public int getId() {
