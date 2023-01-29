@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
-    protected int idCounter = 1;
     protected final HashMap<ItemType, HashMap<Integer, T>> allItems;
     protected final HistoryManager<T> historyManager;
+    protected int idCounter = 1;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
@@ -193,7 +193,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
 
     protected ArrayList<Task> getAllItemsOfAllTypes() {
         ArrayList<Task> tasks = new ArrayList<>();
-        for (HashMap<Integer, T> entrySet: allItems.values()) {
+        for (HashMap<Integer, T> entrySet : allItems.values()) {
             for (Task task : entrySet.values()) {
                 tasks.add(task);
             }
@@ -201,7 +201,7 @@ public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
         return tasks;
     }
 
-    public void addSubtask (Subtask subtask, Epic epic) {
+    public void addSubtask(Subtask subtask, Epic epic) {
         epic.addSubtask(subtask);
         subtask.setEpicId(epic.getId());
     }

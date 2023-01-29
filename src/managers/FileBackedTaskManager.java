@@ -2,13 +2,11 @@ package managers;
 
 import model.*;
 
-import java.awt.event.FocusAdapter;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -87,22 +85,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private void save() throws ManagerSaveException {
-        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(backupFilePath.toFile()))) {
-            String header = String.join(",",
-                    "id", "type", "name", "status", "description", "epic\n");
-
-            fileWriter.write(header);
-            for (Object task : super.getAllItemsOfAllTypes()) {
-                fileWriter.write(toString((Task) task));
-            }
-            fileWriter.write("\n");
-            fileWriter.write(historyToString(historyManager));
-        } catch (IOException e) {
-            throw new ManagerSaveException("Произошла ошибка при записи в файл");
-        }
-    }
-
     public static FileBackedTaskManager loadFromFile(Path file) {
         List<Task> tasksFromFile = new ArrayList<>(); //временное хранилище всех items из файла
         int restoredIdCounter = -1;
@@ -124,7 +106,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     continue;
                 } else if (line.contains("TASK") || line.contains("SUBTASK") || line.contains("EPIC")) {
                     tasksFromFile.add(fromString(line));
-                } else if (line.equals("")){
+                } else if (line.equals("")) {
                     continue;
                 } else {
                     historyIdsLine = line; //читаем пустую строку-разделитель
@@ -154,7 +136,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 items.put(task.getId(), task);
                 restoredAllItems.put(ItemType.SUBTASK, items);
 
-                int epicId = ((Subtask)task).getEpicId();
+                int epicId = ((Subtask) task).getEpicId();
                 if (epicsSubtasksIds.get(epicId) == null) {
                     subtasksIdsForEpic = new ArrayList<>();
                 } else {
@@ -179,8 +161,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         //Восстанавливаем для Epic знание о своих Subtask
         for (Integer epicId : epicsSubtasksIds.keySet()) {
             ((Epic) restoredAllItems.get(ItemType.EPIC)
-                                    .get(epicId))
-                                    .loadEpicSubtasksIds(epicsSubtasksIds.get(epicId));
+                    .get(epicId))
+                    .loadEpicSubtasksIds(epicsSubtasksIds.get(epicId));
         }
 
         //Восстанавливаем историю
@@ -194,29 +176,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         return new FileBackedTaskManager(restoredIdCounter, restoredAllItems, restoredHistoryManager, file);
-    }
-
-    private String toString(Task task) {
-        String[] lineElements =
-                {
-                        String.valueOf(task.getId()),
-                        String.valueOf(task.getItemType()),
-                        task.getName(),
-                        String.valueOf(task.getStatus()),
-                        task.getDescription(),
-                };
-
-        String line = String.join(",", lineElements);
-        StringBuilder backupLineBuilder = new StringBuilder(line);
-
-        if (task.getItemType().equals(ItemType.SUBTASK)) {
-            Subtask thisTask = (Subtask) task;
-            backupLineBuilder.append("," + thisTask.getEpicId() + "\n");
-        } else {
-            backupLineBuilder.append(", " + "\n");
-        }
-
-        return backupLineBuilder.toString();
     }
 
     public static String historyToString(HistoryManager<Task> historyManager) {
@@ -262,6 +221,45 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 return null;
 
         }
+    }
+
+    private void save() throws ManagerSaveException {
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(backupFilePath.toFile()))) {
+            String header = String.join(",",
+                    "id", "type", "name", "status", "description", "epic\n");
+
+            fileWriter.write(header);
+            for (Object task : super.getAllItemsOfAllTypes()) {
+                fileWriter.write(toString((Task) task));
+            }
+            fileWriter.write("\n");
+            fileWriter.write(historyToString(historyManager));
+        } catch (IOException e) {
+            throw new ManagerSaveException("Произошла ошибка при записи в файл");
+        }
+    }
+
+    private String toString(Task task) {
+        String[] lineElements =
+                {
+                        String.valueOf(task.getId()),
+                        String.valueOf(task.getItemType()),
+                        task.getName(),
+                        String.valueOf(task.getStatus()),
+                        task.getDescription(),
+                };
+
+        String line = String.join(",", lineElements);
+        StringBuilder backupLineBuilder = new StringBuilder(line);
+
+        if (task.getItemType().equals(ItemType.SUBTASK)) {
+            Subtask thisTask = (Subtask) task;
+            backupLineBuilder.append("," + thisTask.getEpicId() + "\n");
+        } else {
+            backupLineBuilder.append(", " + "\n");
+        }
+
+        return backupLineBuilder.toString();
     }
 
     @Override

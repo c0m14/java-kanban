@@ -3,9 +3,9 @@ package model;
 import java.util.Objects;
 
 public class HistoryRecord<T extends Task> {
+    private final T item;
     private HistoryRecord prevRecord;
     private HistoryRecord nextRecord;
-    private final T item;
 
     public HistoryRecord(T item) {
         this.item = item;

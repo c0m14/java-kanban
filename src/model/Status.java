@@ -5,7 +5,7 @@ public enum Status {
     IN_PROGRESS,
     DONE;
 
-    public static Status stringToStatus(String status){
+    public static Status stringToStatus(String status) {
         switch (status) {
             case "NEW":
                 return Status.NEW;
