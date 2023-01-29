@@ -7,13 +7,19 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryTaskManager<T extends Task> implements TaskManager<T> {
-    private static int idCounter = 1;
-    private final HashMap<ItemType, HashMap<Integer, T>> allItems;
+    protected int idCounter = 1;
+    protected final HashMap<ItemType, HashMap<Integer, T>> allItems;
     protected final HistoryManager<T> historyManager;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
         this.historyManager = Managers.getDefaultHistory();
+    }
+
+    public InMemoryTaskManager(int idCounter, HashMap<ItemType, HashMap<Integer, T>> allItems, HistoryManager<T> historyManager) {
+        this.idCounter = idCounter;
+        this.allItems = allItems;
+        this.historyManager = historyManager;
     }
 
     public HistoryManager<T> getHistoryManager() {

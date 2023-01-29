@@ -20,6 +20,15 @@ public class Task {
         this.id = id;
         this.description = "";
         this.status = Status.NEW;
+        this.itemType = ItemType.TASK;
+    }
+
+    public Task(int id, String name, String description, Status status, ItemType itemType) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.itemType = itemType;
     }
 
     public ItemType getItemType() {
