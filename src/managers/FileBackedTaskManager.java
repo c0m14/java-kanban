@@ -182,7 +182,8 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
         List<Task> historyList = historyManager.getHistory();
         for (int i = 0; i < historyList.size(); i++) {
             if (i < historyList.size() - 1) {
-                historyIdBuilder.append(historyList.get(i).getId() + ",");
+                historyIdBuilder.append(historyList.get(i).getId())
+                        .append(",");
             } else {
                 historyIdBuilder.append(historyList.get(i).getId());
             }
