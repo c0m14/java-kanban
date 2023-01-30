@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FileBackedTaskManager extends InMemoryTaskManager {
-    Path backupFilePath;
+public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
+    private Path backupFilePath;
 
     public FileBackedTaskManager(Path backupFilePath) {
         super();
@@ -19,7 +19,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     }
 
-    public FileBackedTaskManager(int idCounter, HashMap allItems, HistoryManager historyManager, Path backupFilePath) {
+    public FileBackedTaskManager(int idCounter, HashMap<ItemType, HashMap<Integer, T>> allItems, HistoryManager<T> historyManager, Path backupFilePath) {
         super(idCounter, allItems, historyManager);
         this.backupFilePath = backupFilePath;
     }
@@ -230,7 +230,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             fileWriter.write(header);
             for (Object task : super.getAllItemsOfAllTypes()) {
-                fileWriter.write(toString((Task) task));
+                fileWriter.write(toString((T) task));
             }
             fileWriter.write("\n");
             fileWriter.write(historyToString(historyManager));
@@ -239,7 +239,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private String toString(Task task) {
+    private String toString(T task) {
         String[] lineElements =
                 {
                         String.valueOf(task.getId()),
@@ -262,7 +262,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return backupLineBuilder.toString();
     }
 
-    @Override
+
     public int createItem(Task anyItem) {
         int itemId = super.createItem(anyItem);
         save();
