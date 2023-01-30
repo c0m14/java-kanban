@@ -254,9 +254,12 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
 
         if (task.getItemType().equals(ItemType.SUBTASK)) {
             Subtask thisTask = (Subtask) task;
-            backupLineBuilder.append("," + thisTask.getEpicId() + "\n");
+            backupLineBuilder.append(",")
+                    .append(thisTask.getEpicId())
+                    .append("\n");
         } else {
-            backupLineBuilder.append(", " + "\n");
+            backupLineBuilder.append(", ")
+                    .append("\n");
         }
 
         return backupLineBuilder.toString();
