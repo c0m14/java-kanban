@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
-    private Path backupFilePath;
+    private final Path backupFilePath;
 
     public FileBackedTaskManager(Path backupFilePath) {
         super();
@@ -203,21 +203,21 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
                 return new Task(Integer.parseInt(taskParams[0]),
                         taskParams[2],
                         taskParams[4],
-                        Status.stringToStatus(taskParams[3]),
-                        ItemType.stringToItemType(taskParams[1]));
+                        Status.valueOf(taskParams[3]),
+                        ItemType.valueOf(taskParams[1]));
             case "SUBTASK":
                 return new Subtask(Integer.parseInt(taskParams[0]),
                         taskParams[2],
                         taskParams[4],
-                        Status.stringToStatus(taskParams[3]),
-                        ItemType.stringToItemType(taskParams[1]),
+                        Status.valueOf(taskParams[3]),
+                        ItemType.valueOf(taskParams[1]),
                         Integer.parseInt(taskParams[5]));
             case "EPIC":
                 return new Epic(Integer.parseInt(taskParams[0]),
                         taskParams[2],
                         taskParams[4],
-                        Status.stringToStatus(taskParams[3]),
-                        ItemType.stringToItemType(taskParams[1]));
+                        Status.valueOf(taskParams[3]),
+                        ItemType.valueOf(taskParams[1]));
             default:
                 return null;
 
