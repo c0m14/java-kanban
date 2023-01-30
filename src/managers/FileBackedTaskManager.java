@@ -96,7 +96,7 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
         List<Integer> subtasksIdsForEpic;
 
         String historyIdsLine = "";
-        HistoryManager restoredHistoryManager = Managers.getDefaultHistory();
+        HistoryManager<Task> restoredHistoryManager = Managers.getDefaultHistory();
 
         //вычитываем даные из файла
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file.toFile()))) {
@@ -168,10 +168,9 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
         //Восстанавливаем историю
         String[] historyIdsFromLine = historyIdsLine.split(",");
 
-        for (int i = 0; i < historyIdsFromLine.length; i++) {
-            int id = Integer.parseInt(historyIdsFromLine[i]);
+        for (String id : historyIdsFromLine) {
             for (HashMap<Integer, Task> entrySet : restoredAllItems.values()) {
-                restoredHistoryManager.add(entrySet.get(id));
+                restoredHistoryManager.add(entrySet.get(Integer.parseInt(id)));
             }
         }
 
