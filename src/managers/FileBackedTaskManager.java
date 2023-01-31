@@ -75,7 +75,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         FileBackedTaskManager restoredFileManager = loadFromFile(autosaveFile);
 
         System.out.println("Восстановленные задачи:");
-        for (Object task : restoredFileManager.getAllItemsOfAllTypes()) {
+        for (Task task : restoredFileManager.getAllItemsOfAllTypes()) {
             System.out.println(task);
         }
         System.out.println();
