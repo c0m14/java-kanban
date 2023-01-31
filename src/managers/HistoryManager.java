@@ -4,11 +4,11 @@ import model.Task;
 
 import java.util.List;
 
-public interface HistoryManager<T extends Task> {
+public interface HistoryManager {
 
-    void add(T anyItem);
+    void add(Task anyItem);
 
-    List<T> getHistory();
+    List<Task> getHistory();
 
     void remove(int anyItemId);
 }

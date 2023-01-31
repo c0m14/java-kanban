@@ -5,7 +5,7 @@ import java.nio.file.Path;
 public class Managers {
 
     public static InMemoryHistoryManager getDefaultHistory() {
-        return new InMemoryHistoryManager<>();
+        return new InMemoryHistoryManager();
     }
 
     public static TaskManager getDefault() {

@@ -32,9 +32,9 @@ public class Main {
     }
 
     private static void initiateNewFeaturesTests() {
-        TaskManager<Task> taskManager = Managers.getDefault();
+        TaskManager taskManager = Managers.getDefault();
         InMemoryTaskManager taskManager2 = (InMemoryTaskManager) taskManager;
-        HistoryManager<Task> historyManager = taskManager2.getHistoryManager();
+        HistoryManager historyManager = taskManager2.getHistoryManager();
 
         //Подготовка данных для тестирования
         Task testTask1 = new Task(taskManager.getIdCounter(),

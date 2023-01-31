@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
+public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path backupFilePath;
 
     public FileBackedTaskManager(Path backupFilePath) {
@@ -20,7 +20,7 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
 
     }
 
-    public FileBackedTaskManager(int idCounter, HashMap<ItemType, HashMap<Integer, T>> allItems, HistoryManager<T> historyManager, Path backupFilePath) {
+    public FileBackedTaskManager(int idCounter, HashMap<ItemType, HashMap<Integer, Task>> allItems, HistoryManager historyManager, Path backupFilePath) {
         super(idCounter, allItems, historyManager);
         this.backupFilePath = backupFilePath;
     }
@@ -97,7 +97,7 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
         List<Integer> subtasksIdsForEpic;
 
         String historyIdsLine = "";
-        HistoryManager<Task> restoredHistoryManager = Managers.getDefaultHistory();
+        HistoryManager restoredHistoryManager = Managers.getDefaultHistory();
 
         //вычитываем даные из файла
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file.toFile()))) {
@@ -178,7 +178,7 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
         return new FileBackedTaskManager(restoredIdCounter, restoredAllItems, restoredHistoryManager, file);
     }
 
-    public static String historyToString(HistoryManager<Task> historyManager) {
+    public static String historyToString(HistoryManager historyManager) {
         StringBuilder historyIdBuilder = new StringBuilder();
         List<Task> historyList = historyManager.getHistory();
         for (int i = 0; i < historyList.size(); i++) {
@@ -231,7 +231,7 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
 
             fileWriter.write(header);
             for (Object task : super.getAllItemsOfAllTypes()) {
-                fileWriter.write(toString((T) task));
+                fileWriter.write(toString((Task) task));
             }
             fileWriter.write("\n");
             fileWriter.write(historyToString(historyManager));
@@ -240,7 +240,7 @@ public class FileBackedTaskManager<T extends Task> extends InMemoryTaskManager {
         }
     }
 
-    private String toString(T task) {
+    private String toString(Task task) {
         String[] lineElements =
                 {
                         String.valueOf(task.getId()),

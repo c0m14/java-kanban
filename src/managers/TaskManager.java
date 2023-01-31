@@ -5,19 +5,20 @@ import model.Task;
 
 import java.util.ArrayList;
 
-public interface TaskManager<T extends Task> {
+public interface TaskManager {
 
-    int createItem(T anyItem);
+    int createItem(Task anyItem);
+
 
     int getIdCounter();
 
-    ArrayList<T> getAllItemsByType(ItemType itemType);
+    ArrayList<Task> getAllItemsByType(ItemType itemType);
 
-    void updateItem(T anyItem, int id);
+    void updateItem(Task anyItem, int id);
 
     void removeItemById(int id);
 
     void removeAllItemsByType(ItemType itemType);
 
-    T getItemById(int id);
+    Task getItemById(int id);
 }

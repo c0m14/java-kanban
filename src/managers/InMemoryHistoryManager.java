@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T> {
+public class InMemoryHistoryManager implements HistoryManager {
 
     private final HistoryRecordsLinkedList historyList;
-    private List<T> allItemsHistory;
+    private List<Task> allItemsHistory;
 
     public InMemoryHistoryManager() {
         this.allItemsHistory = new ArrayList<>();
@@ -19,12 +19,12 @@ public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T>
     }
 
     @Override
-    public void add(T anyItem) {
+    public void add(Task anyItem) {
         if (anyItem != null) {
-            Map<Integer, HistoryRecord<T>> taskIdMap = historyList.getTaskIdMap();
+            Map<Integer, HistoryRecord<Task>> taskIdMap = historyList.getTaskIdMap();
 
             if (taskIdMap.keySet() != null && taskIdMap.containsKey(anyItem.getId())) {
-                HistoryRecord<T> oldHistoryRecord = taskIdMap.get(anyItem.getId());
+                HistoryRecord<Task> oldHistoryRecord = taskIdMap.get(anyItem.getId());
                 historyList.removeNode(oldHistoryRecord);
             }
             historyList.linkLast(anyItem);
@@ -32,21 +32,21 @@ public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T>
     }
 
     @Override
-    public List<T> getHistory() {
+    public List<Task> getHistory() {
         allItemsHistory = historyList.getItems();
         return allItemsHistory;
     }
 
     @Override
     public void remove(int anyItemId) {
-        HistoryRecord<T> currRecord = (HistoryRecord<T>) historyList.getTaskIdMap().get(anyItemId);
+        HistoryRecord<Task> currRecord = (HistoryRecord<Task>) historyList.getTaskIdMap().get(anyItemId);
         historyList.removeNode(currRecord);
     }
 
-    private class HistoryRecordsLinkedList<T extends Task> {
-        private HistoryRecord<T> head;
-        private HistoryRecord<T> tail;
-        private final Map<Integer, HistoryRecord<T>> taskIdMap;
+    private class HistoryRecordsLinkedList {
+        private HistoryRecord<Task> head;
+        private HistoryRecord<Task> tail;
+        private final Map<Integer, HistoryRecord<Task>> taskIdMap;
 
         public HistoryRecordsLinkedList() {
             this.head = null;
@@ -54,8 +54,8 @@ public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T>
             this.taskIdMap = new HashMap<>();
         }
 
-        public void linkLast(T item) {
-            HistoryRecord<T> historyRecord = new HistoryRecord<>(item);
+        public void linkLast(Task item) {
+            HistoryRecord<Task> historyRecord = new HistoryRecord<>(item);
 
             if (head == null) {
                 head = historyRecord;
@@ -67,9 +67,9 @@ public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T>
             taskIdMap.put(item.getId(), historyRecord);
         }
 
-        public List<T> getItems() {
-            List<T> updatedAllItemsHistory = new ArrayList<>();
-            HistoryRecord<T> currentRecord = historyList.head;
+        public List<Task> getItems() {
+            List<Task> updatedAllItemsHistory = new ArrayList<>();
+            HistoryRecord<Task> currentRecord = historyList.head;
 
             while (currentRecord != null) {
                 updatedAllItemsHistory.add(currentRecord.getItem());
@@ -103,7 +103,7 @@ public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T>
 
         }
 
-        public Map<Integer, HistoryRecord<T>> getTaskIdMap() {
+        public Map<Integer, HistoryRecord<Task>> getTaskIdMap() {
             return taskIdMap;
         }
 
