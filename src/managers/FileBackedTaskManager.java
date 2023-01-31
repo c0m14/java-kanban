@@ -81,7 +81,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println();
 
         System.out.println("Восстановленная история:");
-        for (Object historyRecord : restoredFileManager.getHistoryManager().getHistory()) {
+        for (Task historyRecord : restoredFileManager.getHistoryManager().getHistory()) {
             System.out.println(historyRecord);
         }
     }
@@ -230,8 +230,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     "id", "type", "name", "status", "description", "epic\n");
 
             fileWriter.write(header);
-            for (Object task : super.getAllItemsOfAllTypes()) {
-                fileWriter.write(toString((Task) task));
+            for (Task task : super.getAllItemsOfAllTypes()) {
+                fileWriter.write(toString((task)));
             }
             fileWriter.write("\n");
             fileWriter.write(historyToString(historyManager));
