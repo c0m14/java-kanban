@@ -3,6 +3,7 @@ package model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
     protected int id;
@@ -10,7 +11,7 @@ public class Task {
     protected String description;
     protected Status status;
     protected ItemType itemType;
-    protected Duration durationMin;
+    protected Duration durationMinutes;
     protected LocalDateTime startTime;
 
     //description, durationMin и startTime при создании опциональны
@@ -30,49 +31,6 @@ public class Task {
 
     public Task(int id,
                 String name,
-                Duration durationMin,
-                LocalDateTime startTime) {
-        this.id = id;
-        this.name = name;
-        this.description = "";
-        this.durationMin = durationMin;
-        this.startTime = startTime;
-        this.itemType = ItemType.TASK;
-        this.status = Status.NEW;
-    }
-
-    public Task(int id,
-                String name,
-                String description,
-                Duration durationMin,
-                LocalDateTime startTime) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.durationMin = durationMin;
-        this.startTime = startTime;
-        this.itemType = ItemType.TASK;
-        this.status = Status.NEW;
-    }
-
-    public Task(int id,
-                String name,
-                String description,
-                Status status,
-                ItemType itemType,
-                Duration durationMin,
-                LocalDateTime startTime) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.itemType = itemType;
-        this.durationMin = durationMin;
-        this.startTime = startTime;
-    }
-
-    public Task(int id,
-                String name,
                 String description,
                 Status status,
                 ItemType itemType) {
@@ -83,20 +41,40 @@ public class Task {
         this.itemType = itemType;
     }
 
-    public void setDurationMin(Duration durationMin) {
-        this.durationMin = durationMin;
+    public Task(int id,
+                String name,
+                String description,
+                Status status,
+                ItemType itemType,
+                Duration durationMinutes,
+                LocalDateTime startTime) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.itemType = itemType;
+        this.durationMinutes = durationMinutes;
+        this.startTime = startTime;
+    }
+
+    public void setDurationMinutes(Duration durationMinutes) {
+        this.durationMinutes = durationMinutes;
     }
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
-        return startTime.minusMinutes(durationMin.toMinutes());
+    public Optional<LocalDateTime> getEndTime() {
+        if (this.startTime != null && this.durationMinutes != null) {
+            return Optional.of(startTime.plusMinutes(durationMinutes.toMinutes()));
+        } else {
+            return Optional.empty();
+        }
     }
 
-    public Duration getDurationMin() {
-        return durationMin;
+    public Duration getDurationMinutes() {
+        return durationMinutes;
     }
 
     public LocalDateTime getStartTime() {

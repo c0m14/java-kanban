@@ -19,14 +19,16 @@ public class InMemoryTaskManagerTest {
     static Subtask subtask1;
     static Subtask subtask2;
     static Subtask subtask3WithOutStartDate;
+    static DateTimeFormatter formatter;
 
     @BeforeAll
     public static void beforeAll() {
-        inMemoryTaskManage = (InMemoryTaskManager) Managers.getDefault();
+        formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     }
 
     @BeforeEach
     public void beforeEach() {
+        inMemoryTaskManage = (InMemoryTaskManager) Managers.getDefault();
         epic = new Epic(inMemoryTaskManage.getIdCounter(),
                 "epicName");
         inMemoryTaskManage.createItem(epic);
@@ -52,43 +54,86 @@ public class InMemoryTaskManagerTest {
     //Тесты расчета startTime для Epic
     @Test
     public void shouldSetMinOfEpicSubtasksStartTime() {
-        String startTimeForSubtask1 = "01-01-2023 12:00";
-        String startTimeForSubtask2 = "03-02-2023 16:20";
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-
-        subtask1.setStartTime(LocalDateTime.parse(startTimeForSubtask1, formatter));
-        subtask2.setStartTime(LocalDateTime.parse(startTimeForSubtask2, formatter));
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
 
         inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
 
-        Assertions.assertEquals(LocalDateTime.of(2023, 1, 1, 12, 0), epic.getStartTime());
+        Assertions.assertEquals(LocalDateTime.of(2023, 1, 1, 12, 0),
+                epic.getStartTime(),
+                "startTime неверно для Epic");
     }
 
     @Test
     public void shouldReturnNullIfEpicSubtasksStartTimeIsNull() {
         inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
 
-        Assertions.assertNull(epic.getStartTime());
+        Assertions.assertNull(epic.getStartTime(),
+                "startTime не null для Epic");
     }
 
     //Тесты расчета duration для Epic
-
     @Test
     public void shouldSetMaxOfEpicSubtasksDuration() {
-        subtask1.setDurationMin(Duration.of(30, ChronoUnit.MINUTES));
-        subtask2.setDurationMin(Duration.of(120, ChronoUnit.MINUTES));
+        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
         inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
 
-        Assertions.assertEquals(Duration.of(120, ChronoUnit.MINUTES), epic.getDurationMin());
+        Assertions.assertEquals(Duration.of(150, ChronoUnit.MINUTES),
+                epic.getDurationMinutes(),
+                "Неверно расчитано duration для Epic");
     }
 
     @Test
-    public void shouldReturnNullIfEpicSubtasksDurationIsNull() {
+    public void shouldReturnZeroIfEpicSubtasksDurationIsNull() {
         inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
 
-        Assertions.assertNull(epic.getDurationMin());
+        Assertions.assertEquals(0,
+                epic.getDurationMinutes().toMinutes(),
+                "duration не равно 0");
+    }
+
+    //Тесты для расчета endTime для Epic
+    @Test
+    public void shouldSetCorrectEndTimeForEpic() {
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
+        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+
+        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+
+        Assertions.assertEquals(LocalDateTime.parse("03-02-2023 18:20", formatter),
+                epic.getEndTime().get(),
+                "Неверно расчитан endTime для Epic");
+    }
+
+    @Test
+    public void shouldSetCorrectEntTimeIfDurationIsAbsentInSubtask() {
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
+        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+
+
+        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+
+        Assertions.assertEquals(LocalDateTime.parse("01-01-2023 12:30", formatter),
+                epic.getEndTime().get(),
+                "Неверно расчитан endTime для Epic");
+    }
+
+    @Test
+    public void shouldSetCorrectEntTimeIfStartTimeIsAbsentInSubtask() {
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+
+        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+
+        Assertions.assertEquals(LocalDateTime.parse("01-01-2023 12:30", formatter),
+                epic.getEndTime().get(),
+                "Неверно расчитан endTime для Epic");
     }
 
 }

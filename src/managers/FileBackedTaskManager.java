@@ -189,8 +189,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 historyIdBuilder.append(historyList.get(i).getId());
             }
         }
-
-
         return historyIdBuilder.toString();
     }
 

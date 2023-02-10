@@ -2,6 +2,9 @@ package managers;
 
 import model.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -46,6 +49,7 @@ public class InMemoryTaskManager implements TaskManager {
             allItems.put(ItemType.SUBTASK, items);
             if (((Subtask) anyItem).getEpicId() != 0) {
                 updateEpicStatus(((Subtask) anyItem).getEpicId());
+                updateEpicStartTimeAndDuration(((Subtask) anyItem).getEpicId());
             }
         }
         if (anyItem.getClass() == Epic.class) {
@@ -86,6 +90,7 @@ public class InMemoryTaskManager implements TaskManager {
             Subtask newSubtask = (Subtask) anyItem;
             int epicId = newSubtask.getEpicId();
             updateEpicStatus(epicId);
+            updateEpicStartTimeAndDuration(epicId);
 
             items = allItems.get(ItemType.SUBTASK);
             items.put(id, anyItem);
@@ -103,6 +108,7 @@ public class InMemoryTaskManager implements TaskManager {
                 hashmap.remove(id);
             }
             updateEpicStatus(currEpic.getId());
+            updateEpicStartTimeAndDuration(currEpic.getId());
         } else if (getItemById(id).getClass() == Epic.class) {
             Epic currEpic = (Epic) getItemById(id);
             List<Integer> currEpicSubtasksIds = new ArrayList<>(currEpic.getEpicSubtaskIds());
@@ -137,6 +143,7 @@ public class InMemoryTaskManager implements TaskManager {
             allItems.get(itemType).clear();
             for (Integer id : relatedEpicsId) {
                 updateEpicStatus(id);
+                updateEpicStartTimeAndDuration(id);
             }
         } else {
             for (Integer itemId : allItems.get(itemType).keySet()) {
@@ -193,16 +200,25 @@ public class InMemoryTaskManager implements TaskManager {
         Epic currEpic = (Epic) getItemById(epicId);
         if (!getEpicSubtasks(epicId).isEmpty()) {
             //Обновляем startTime
-            Optional<Subtask> subtaskWithMinStartTime = getEpicSubtasks(epicId).stream()
-                    .filter(subtask -> subtask.getStartTime() != null)
-                    .min(Comparator.comparing(Task::getStartTime));
-            subtaskWithMinStartTime.ifPresent(subtask -> currEpic.setStartTime(subtask.getStartTime()));
+            Optional<LocalDateTime> minStartTime = getEpicSubtasks(epicId).stream()
+                    .map(Task::getStartTime)
+                    .filter(Objects::nonNull)
+                    .min(LocalDateTime::compareTo);
+            minStartTime.ifPresent(currEpic::setStartTime);
 
             //Обновляем duration
-            Optional<Subtask> subtaskWithMaxDuration = getEpicSubtasks(epicId).stream()
-                    .filter(s -> s.getDurationMin() !=null)
-                    .max(Comparator.comparing(Task::getDurationMin));
-            subtaskWithMaxDuration.ifPresent(subtask -> currEpic.setDurationMin(subtask.getDurationMin()));
+            long epicDuration = getEpicSubtasks(epicId).stream()
+                    .filter(subtask -> subtask.getDurationMinutes() !=null)
+                    .mapToLong(subtask -> subtask.getDurationMinutes().toMinutes())
+                            .sum();
+            currEpic.setDurationMinutes(Duration.of(epicDuration, ChronoUnit.MINUTES));
+
+            //Обновляем endTime;
+           Optional<LocalDateTime> maxEndTime = getEpicSubtasks(epicId).stream()
+                    .filter(subtask -> subtask.getEndTime().isPresent())
+                    .map(subtask -> subtask.getEndTime().get())
+                    .max(LocalDateTime::compareTo);
+            maxEndTime.ifPresent(currEpic::setEndTime);
         }
     }
 
