@@ -2,9 +2,7 @@ package managers;
 
 import model.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<ItemType, HashMap<Integer, Task>> allItems;
@@ -47,7 +45,7 @@ public class InMemoryTaskManager implements TaskManager {
             items.put(idCounter, anyItem);
             allItems.put(ItemType.SUBTASK, items);
             if (((Subtask) anyItem).getEpicId() != 0) {
-                epicUpdateStatus(((Subtask) anyItem).getEpicId());
+                updateEpicStatus(((Subtask) anyItem).getEpicId());
             }
         }
         if (anyItem.getClass() == Epic.class) {
@@ -87,7 +85,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (anyItem.getClass() == Subtask.class) {
             Subtask newSubtask = (Subtask) anyItem;
             int epicId = newSubtask.getEpicId();
-            epicUpdateStatus(epicId);
+            updateEpicStatus(epicId);
 
             items = allItems.get(ItemType.SUBTASK);
             items.put(id, anyItem);
@@ -104,7 +102,7 @@ public class InMemoryTaskManager implements TaskManager {
             for (HashMap<Integer, Task> hashmap : allItems.values()) {
                 hashmap.remove(id);
             }
-            epicUpdateStatus(currEpic.getId());
+            updateEpicStatus(currEpic.getId());
         } else if (getItemById(id).getClass() == Epic.class) {
             Epic currEpic = (Epic) getItemById(id);
             List<Integer> currEpicSubtasksIds = new ArrayList<>(currEpic.getEpicSubtaskIds());
@@ -138,7 +136,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             allItems.get(itemType).clear();
             for (Integer id : relatedEpicsId) {
-                epicUpdateStatus(id);
+                updateEpicStatus(id);
             }
         } else {
             for (Integer itemId : allItems.get(itemType).keySet()) {
@@ -170,7 +168,7 @@ public class InMemoryTaskManager implements TaskManager {
         return epicSubtasks;
     }
 
-    private void epicUpdateStatus(int epicId) {
+    private void updateEpicStatus(int epicId) {
         Epic currEpic = (Epic) getItemById(epicId);
         if (getEpicSubtasks(epicId).isEmpty()) {
             currEpic.setStatus(Status.NEW);
@@ -188,6 +186,23 @@ public class InMemoryTaskManager implements TaskManager {
                     break;
                 }
             }
+        }
+    }
+
+    public void updateEpicStartTimeAndDuration(int epicId) {
+        Epic currEpic = (Epic) getItemById(epicId);
+        if (!getEpicSubtasks(epicId).isEmpty()) {
+            //Обновляем startTime
+            Optional<Subtask> subtaskWithMinStartTime = getEpicSubtasks(epicId).stream()
+                    .filter(subtask -> subtask.getStartTime() != null)
+                    .min(Comparator.comparing(Task::getStartTime));
+            subtaskWithMinStartTime.ifPresent(subtask -> currEpic.setStartTime(subtask.getStartTime()));
+
+            //Обновляем duration
+            Optional<Subtask> subtaskWithMaxDuration = getEpicSubtasks(epicId).stream()
+                    .filter(s -> s.getDurationMin() !=null)
+                    .max(Comparator.comparing(Task::getDurationMin));
+            subtaskWithMaxDuration.ifPresent(subtask -> currEpic.setDurationMin(subtask.getDurationMin()));
         }
     }
 
