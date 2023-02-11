@@ -1,5 +1,6 @@
 package managers;
 
+import exceptions.TaskTimeIntersectionException;
 import model.*;
 
 import java.time.Duration;
@@ -45,6 +46,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createItem(Task anyItem) {
         HashMap<Integer, Task> items;
         if (anyItem.getClass() == Task.class) {
+            checkIntervalAvailability(anyItem);
             if (allItems.get(ItemType.TASK) != null) {
                 items = allItems.get(ItemType.TASK);
             } else {
@@ -55,6 +57,7 @@ public class InMemoryTaskManager implements TaskManager {
             prioritizedItems.add(anyItem);
         }
         if (anyItem.getClass() == Subtask.class) {
+            checkIntervalAvailability(anyItem);
             if (allItems.get(ItemType.SUBTASK) != null) {
                 items = allItems.get(ItemType.SUBTASK);
             } else {
@@ -62,6 +65,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             items.put(idCounter, anyItem);
             allItems.put(ItemType.SUBTASK, items);
+            checkIntervalAvailability(anyItem);
             prioritizedItems.add(anyItem);
 
             if (((Subtask) anyItem).getEpicId() != 0) {
@@ -99,11 +103,13 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateItem(Task anyItem, int id) {
         HashMap<Integer, Task> items;
         if (anyItem.getClass() == Task.class) {
+            checkIntervalAvailability(anyItem);
             items = allItems.get(ItemType.TASK);
             items.put(id, anyItem);
             allItems.put(ItemType.TASK, items);
         }
         if (anyItem.getClass() == Subtask.class) {
+            checkIntervalAvailability(anyItem);
             Subtask newSubtask = (Subtask) anyItem;
             int epicId = newSubtask.getEpicId();
             updateEpicStatus(epicId);
@@ -176,6 +182,25 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public ArrayList<Task> getPrioritizedTasks() {
         return new ArrayList<>(prioritizedItems);
+    }
+
+    public void checkIntervalAvailability(Task item) throws TaskTimeIntersectionException {
+        List<Task> prioritizedTasksList = getPrioritizedTasks();
+
+        if (item.getEndTime().isPresent()) {
+            for (Task prioritizedTask : prioritizedTasksList) {
+                if (prioritizedTask.getStartTime() != null && prioritizedTask.getDurationMinutes() != null) {
+                    if (item.getStartTime().isAfter(prioritizedTask.getStartTime())
+                            && item.getStartTime().isBefore(prioritizedTask.getEndTime().get())) {
+                        throw new TaskTimeIntersectionException("Данное время уже занято задачей " + item);
+                    }
+                    if (item.getEndTime().get().isAfter(prioritizedTask.getStartTime())
+                            && item.getEndTime().get().isBefore(prioritizedTask.getEndTime().get())) {
+                        throw new TaskTimeIntersectionException("Данное время уже занято задачей " + item);
+                    }
+                }
+            }
+        }
     }
 
     public Task getItemById(int id) {

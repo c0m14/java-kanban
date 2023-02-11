@@ -1,5 +1,6 @@
 package managers;
 
+import exceptions.TaskTimeIntersectionException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -7,14 +8,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 public class InMemoryTaskManagerTest {
 
@@ -59,7 +59,10 @@ public class InMemoryTaskManagerTest {
     @Test
     public void shouldSetMinOfEpicSubtasksStartTime() {
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
         subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
+        inMemoryTaskManage.updateItem(subtask2, subtask2.getId());
 
         inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
@@ -80,7 +83,10 @@ public class InMemoryTaskManagerTest {
     @Test
     public void shouldSetMaxOfEpicSubtasksDuration() {
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask2, subtask2.getId());
 
         inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
@@ -102,9 +108,12 @@ public class InMemoryTaskManagerTest {
     @Test
     public void shouldSetCorrectEndTimeForEpic() {
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
-        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
+        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask2, subtask2.getId());
 
         inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
@@ -116,9 +125,10 @@ public class InMemoryTaskManagerTest {
     @Test
     public void shouldSetCorrectEntTimeIfDurationIsAbsentInSubtask() {
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
-        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
 
+        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
 
         inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
@@ -131,7 +141,10 @@ public class InMemoryTaskManagerTest {
     public void shouldSetCorrectEntTimeIfStartTimeIsAbsentInSubtask() {
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask2, subtask2.getId());
 
         inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
@@ -140,18 +153,63 @@ public class InMemoryTaskManagerTest {
                 "Неверно расcчитан endTime для Epic");
     }
 
-    //Тесты приоритезации задач
-
+    //Тесты приоритизации задач
     @Test
     public void shouldReturnRightOrderByStartTimeASC() {
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
         subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
+        inMemoryTaskManage.updateItem(subtask2, subtask2.getId());
 
         List<Task> prioritizedTasks = inMemoryTaskManage.getPrioritizedTasks();
 
         Assertions.assertEquals(prioritizedTasks.get(0), subtask1);
         Assertions.assertEquals(prioritizedTasks.get(1), subtask2);
         Assertions.assertEquals(prioritizedTasks.get(2), subtask3WithOutStartDate);
+    }
+
+    //Тесты проверки пересечения задач
+    @Test
+    public void shouldThrowExceptionIfStartTimeIntersectOtherTask() {
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:30", formatter));
+        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
+        //Время начала пересекается с первой
+        subtask2.setStartTime(LocalDateTime.parse("01-01-2023 11:40", formatter));
+        subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+
+        Assertions.assertThrows(TaskTimeIntersectionException.class,
+                () -> inMemoryTaskManage.updateItem(subtask2, subtask2.getId()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfEndTimeIntersectOtherTask() {
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:20", formatter));
+        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
+        //Время конца пересекается с первой
+        subtask2.setStartTime(LocalDateTime.parse("01-01-2023 11:10", formatter));
+        subtask2.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+
+        Assertions.assertThrows(TaskTimeIntersectionException.class,
+                () -> inMemoryTaskManage.updateItem(subtask2, subtask2.getId()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfStartAndEndTimeIntersectOtherTask() {
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:50", formatter));
+        subtask1.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+        inMemoryTaskManage.updateItem(subtask1, subtask1.getId());
+
+        //Полностью пересекается с первой
+        subtask2.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        subtask2.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+
+        Assertions.assertThrows(TaskTimeIntersectionException.class,
+                () -> inMemoryTaskManage.updateItem(subtask2, subtask2.getId()));
     }
 
 }
