@@ -132,7 +132,7 @@ public class Task {
         } else {
             sb.append(", startTime='null'");
         }
-        if (durationMinutes !=null) {
+        if (durationMinutes != null) {
             sb.append(", duration='")
                     .append(durationMinutes)
                     .append('\'');
@@ -153,7 +153,10 @@ public class Task {
             return false;
         }
         Task task = (Task) o;
-        return id == task.id && name.equals(task.name) && Objects.equals(description, task.description) && status.equals(task.status);
+        return id == task.id &&
+                name.equals(task.name) &&
+                Objects.equals(description, task.description) &&
+                status.equals(task.status);
     }
 
     @Override

@@ -4,11 +4,11 @@ import model.ItemType;
 import model.Task;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 public interface TaskManager {
 
     int createItem(Task anyItem);
-
 
     int getIdCounter();
 
@@ -21,4 +21,6 @@ public interface TaskManager {
     void removeAllItemsByType(ItemType itemType);
 
     Task getItemById(int id);
+
+    ArrayList<Task> getPrioritizedTasks();
 }

@@ -5,22 +5,36 @@ import model.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<ItemType, HashMap<Integer, Task>> allItems;
     protected final HistoryManager historyManager;
     protected int idCounter = 1;
+    protected TreeSet<Task> prioritizedItems;
 
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
         this.historyManager = Managers.getDefaultHistory();
+        this.prioritizedItems = new TreeSet<>(new Comparator<Task>() {
+            @Override
+            public int compare(Task task1, Task task2) {
+                if (task1.getStartTime() == null && task2.getStartTime() == null) {
+                    return 2;
+                } else if (task1.getStartTime() == null && task2.getStartTime() != null) {
+                    return 1;
+                } else if (task1.getStartTime() != null && task2.getStartTime() == null) {
+                    return -1;
+                } else return task1.getStartTime().compareTo(task2.getStartTime());
+            }
+        });
     }
 
-    public InMemoryTaskManager(int idCounter, HashMap<ItemType, HashMap<Integer, Task>> allItems, HistoryManager historyManager) {
+    public InMemoryTaskManager(int idCounter,
+                               HashMap<ItemType,
+                                       HashMap<Integer,
+                                               Task>> allItems,
+                               HistoryManager historyManager) {
         this.idCounter = idCounter;
         this.allItems = allItems;
         this.historyManager = historyManager;
@@ -41,6 +55,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             items.put(idCounter, anyItem);
             allItems.put(ItemType.TASK, items);
+            prioritizedItems.add(anyItem);
         }
         if (anyItem.getClass() == Subtask.class) {
             if (allItems.get(ItemType.SUBTASK) != null) {
@@ -50,6 +65,8 @@ public class InMemoryTaskManager implements TaskManager {
             }
             items.put(idCounter, anyItem);
             allItems.put(ItemType.SUBTASK, items);
+            prioritizedItems.add(anyItem);
+
             if (((Subtask) anyItem).getEpicId() != 0) {
                 updateEpicStatus(((Subtask) anyItem).getEpicId());
                 updateEpicStartTimeDurationEndTime(((Subtask) anyItem).getEpicId());
@@ -128,6 +145,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         historyManager.remove(id);
+        prioritizedItems.remove(getItemById(id));
     }
 
     @Override
@@ -142,6 +160,7 @@ public class InMemoryTaskManager implements TaskManager {
                     relatedEpicsId.add(currEpic.getId());
                 }
                 historyManager.remove(currSubtask.getId());
+                prioritizedItems.remove(currSubtask);
             }
             allItems.get(itemType).clear();
             for (Integer id : relatedEpicsId) {
@@ -151,9 +170,15 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             for (Integer itemId : allItems.get(itemType).keySet()) {
                 historyManager.remove(itemId);
+                prioritizedItems.remove(getItemById(itemId));
             }
             allItems.get(itemType).clear();
         }
+    }
+
+    @Override
+    public ArrayList<Task> getPrioritizedTasks() {
+        return new ArrayList<>(prioritizedItems);
     }
 
     public Task getItemById(int id) {

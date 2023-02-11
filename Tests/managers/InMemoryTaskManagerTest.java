@@ -2,6 +2,7 @@ package managers;
 
 import model.Epic;
 import model.Subtask;
+import model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeSet;
 
 public class InMemoryTaskManagerTest {
 
@@ -133,7 +137,21 @@ public class InMemoryTaskManagerTest {
 
         Assertions.assertEquals(LocalDateTime.parse("01-01-2023 12:30", formatter),
                 epic.getEndTime().get(),
-                "Неверно расчитан endTime для Epic");
+                "Неверно расcчитан endTime для Epic");
+    }
+
+    //Тесты приоритезации задач
+
+    @Test
+    public void shouldReturnRightOrderByStartTimeASC() {
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
+
+        List<Task> prioritizedTasks = inMemoryTaskManage.getPrioritizedTasks();
+
+        Assertions.assertEquals(prioritizedTasks.get(0), subtask1);
+        Assertions.assertEquals(prioritizedTasks.get(1), subtask2);
+        Assertions.assertEquals(prioritizedTasks.get(2), subtask3WithOutStartDate);
     }
 
 }
