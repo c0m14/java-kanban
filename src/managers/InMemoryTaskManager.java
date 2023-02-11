@@ -16,28 +16,25 @@ public class InMemoryTaskManager implements TaskManager {
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
         this.historyManager = Managers.getDefaultHistory();
-        this.prioritizedItems = new TreeSet<>(new Comparator<Task>() {
-            @Override
-            public int compare(Task task1, Task task2) {
-                if (task1.getStartTime() == null && task2.getStartTime() == null) {
-                    return 2;
-                } else if (task1.getStartTime() == null && task2.getStartTime() != null) {
-                    return 1;
-                } else if (task1.getStartTime() != null && task2.getStartTime() == null) {
-                    return -1;
-                } else return task1.getStartTime().compareTo(task2.getStartTime());
-            }
+        this.prioritizedItems = new TreeSet<>((task1, task2) -> {
+            if (task1.getStartTime() == null && task2.getStartTime() == null) {
+                return 2;
+            } else if (task1.getStartTime() == null && task2.getStartTime() != null) {
+                return 1;
+            } else if (task1.getStartTime() != null && task2.getStartTime() == null) {
+                return -1;
+            } else return task1.getStartTime().compareTo(task2.getStartTime());
         });
     }
 
     public InMemoryTaskManager(int idCounter,
-                               HashMap<ItemType,
-                                       HashMap<Integer,
-                                               Task>> allItems,
-                               HistoryManager historyManager) {
+                               HashMap<ItemType, HashMap<Integer, Task>> allItems,
+                               HistoryManager historyManager,
+                               TreeSet<Task> prioritizedItems) {
         this.idCounter = idCounter;
         this.allItems = allItems;
         this.historyManager = historyManager;
+        this.prioritizedItems = prioritizedItems;
     }
 
     public HistoryManager getHistoryManager() {

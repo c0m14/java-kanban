@@ -11,9 +11,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path backupFilePath;
@@ -26,11 +24,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public FileBackedTaskManager(int idCounter,
-                                 HashMap<ItemType,
-                                 HashMap<Integer, Task>> allItems,
+                                 HashMap<ItemType, HashMap<Integer, Task>> allItems,
                                  HistoryManager historyManager,
+                                 TreeSet<Task> prioritizedItems,
                                  Path backupFilePath) {
-        super(idCounter, allItems, historyManager);
+        super(idCounter, allItems, historyManager, prioritizedItems);
         this.backupFilePath = backupFilePath;
     }
 
@@ -105,6 +103,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
         HashMap<Integer, Task> items;
+        TreeSet<Task> restoredPrioritizedItems = new TreeSet<>((task1, task2) -> {
+            if (task1.getStartTime() == null && task2.getStartTime() == null) {
+                return 2;
+            } else if (task1.getStartTime() == null && task2.getStartTime() != null) {
+                return 1;
+            } else if (task1.getStartTime() != null && task2.getStartTime() == null) {
+                return -1;
+            } else return task1.getStartTime().compareTo(task2.getStartTime());
+        });
 
         HashMap<Integer, List<Integer>> epicsSubtasksIds = new HashMap<>();
         List<Integer> subtasksIdsForEpic;
@@ -140,6 +147,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
                 items.put(task.getId(), task);
                 restoredAllItems.put(ItemType.TASK, items);
+                restoredPrioritizedItems.add(task);
             }
             if (task.getItemType().equals(ItemType.SUBTASK)) {
                 if (restoredAllItems.get(ItemType.SUBTASK) != null) {
@@ -149,6 +157,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
                 items.put(task.getId(), task);
                 restoredAllItems.put(ItemType.SUBTASK, items);
+                restoredPrioritizedItems.add(task);
 
                 int epicId = ((Subtask) task).getEpicId();
                 if (epicsSubtasksIds.get(epicId) == null) {
@@ -190,6 +199,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         FileBackedTaskManager  restoredFileManager = new FileBackedTaskManager(restoredIdCounter,
                 restoredAllItems,
                 restoredHistoryManager,
+                restoredPrioritizedItems,
                 file);
 
         //Восстанавливаем startTime / duration / EndTime для Epic
