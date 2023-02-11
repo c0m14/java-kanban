@@ -5,7 +5,10 @@ import model.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<ItemType, HashMap<Integer, Task>> allItems;
@@ -49,7 +52,7 @@ public class InMemoryTaskManager implements TaskManager {
             allItems.put(ItemType.SUBTASK, items);
             if (((Subtask) anyItem).getEpicId() != 0) {
                 updateEpicStatus(((Subtask) anyItem).getEpicId());
-                updateEpicStartTimeAndDuration(((Subtask) anyItem).getEpicId());
+                updateEpicStartTimeDurationEndTime(((Subtask) anyItem).getEpicId());
             }
         }
         if (anyItem.getClass() == Epic.class) {
@@ -90,7 +93,7 @@ public class InMemoryTaskManager implements TaskManager {
             Subtask newSubtask = (Subtask) anyItem;
             int epicId = newSubtask.getEpicId();
             updateEpicStatus(epicId);
-            updateEpicStartTimeAndDuration(epicId);
+            updateEpicStartTimeDurationEndTime(epicId);
 
             items = allItems.get(ItemType.SUBTASK);
             items.put(id, anyItem);
@@ -108,7 +111,7 @@ public class InMemoryTaskManager implements TaskManager {
                 hashmap.remove(id);
             }
             updateEpicStatus(currEpic.getId());
-            updateEpicStartTimeAndDuration(currEpic.getId());
+            updateEpicStartTimeDurationEndTime(currEpic.getId());
         } else if (getItemById(id).getClass() == Epic.class) {
             Epic currEpic = (Epic) getItemById(id);
             List<Integer> currEpicSubtasksIds = new ArrayList<>(currEpic.getEpicSubtaskIds());
@@ -143,7 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
             allItems.get(itemType).clear();
             for (Integer id : relatedEpicsId) {
                 updateEpicStatus(id);
-                updateEpicStartTimeAndDuration(id);
+                updateEpicStartTimeDurationEndTime(id);
             }
         } else {
             for (Integer itemId : allItems.get(itemType).keySet()) {
@@ -196,29 +199,29 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void updateEpicStartTimeAndDuration(int epicId) {
+    public void updateEpicStartTimeDurationEndTime(int epicId) {
         Epic currEpic = (Epic) getItemById(epicId);
         if (!getEpicSubtasks(epicId).isEmpty()) {
             //Обновляем startTime
-            Optional<LocalDateTime> minStartTime = getEpicSubtasks(epicId).stream()
+            getEpicSubtasks(epicId).stream()
                     .map(Task::getStartTime)
                     .filter(Objects::nonNull)
-                    .min(LocalDateTime::compareTo);
-            minStartTime.ifPresent(currEpic::setStartTime);
+                    .min(LocalDateTime::compareTo)
+                    .ifPresent(currEpic::setStartTime);
 
             //Обновляем duration
             long epicDuration = getEpicSubtasks(epicId).stream()
-                    .filter(subtask -> subtask.getDurationMinutes() !=null)
+                    .filter(subtask -> subtask.getDurationMinutes() != null)
                     .mapToLong(subtask -> subtask.getDurationMinutes().toMinutes())
-                            .sum();
+                    .sum();
             currEpic.setDurationMinutes(Duration.of(epicDuration, ChronoUnit.MINUTES));
 
             //Обновляем endTime;
-           Optional<LocalDateTime> maxEndTime = getEpicSubtasks(epicId).stream()
+            getEpicSubtasks(epicId).stream()
                     .filter(subtask -> subtask.getEndTime().isPresent())
                     .map(subtask -> subtask.getEndTime().get())
-                    .max(LocalDateTime::compareTo);
-            maxEndTime.ifPresent(currEpic::setEndTime);
+                    .max(LocalDateTime::compareTo)
+                    .ifPresent(currEpic::setEndTime);
         }
     }
 

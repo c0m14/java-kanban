@@ -2,6 +2,7 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -44,19 +45,42 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        String result = "Subtask{" +
-                "id=" + id +
-                ", name='" + name + '\'';
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        StringBuilder sb = new StringBuilder("SUBTASK{");
+        sb.append("id=")
+                .append(id)
+                .append(", name='")
+                .append(name)
+                .append('\'');
         if (description != null) {
-            result = result + ", description.length()='" + description.length() + '\'';
+            sb.append(", description.length()='")
+                    .append(description.length())
+                    .append('\'');
         } else {
-            result = result + ", description.length()='null'";
+            sb.append(", description.length()='null'");
         }
-        result = result +
-                ", status='" + status + '\'' +
-                ", epicId=" + epicId +
-                '}';
-        return result;
+        sb.append(", status='")
+                .append(status)
+                .append('\'');
+        if (startTime != null) {
+            sb.append(", startTime='")
+                    .append(startTime.format(formatter))
+                    .append('\'');
+        } else {
+            sb.append(", startTime='null'");
+        }
+        if (durationMinutes !=null) {
+            sb.append(", duration='")
+                    .append(durationMinutes)
+                    .append('\'');
+        } else {
+            sb.append(", duration='null");
+        }
+        sb.append(epicId)
+                .append('}');
+
+        return sb.toString();
+
     }
 
     @Override

@@ -57,7 +57,7 @@ public class InMemoryTaskManagerTest {
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
 
-        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+        inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
         Assertions.assertEquals(LocalDateTime.of(2023, 1, 1, 12, 0),
                 epic.getStartTime(),
@@ -66,7 +66,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void shouldReturnNullIfEpicSubtasksStartTimeIsNull() {
-        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+        inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
         Assertions.assertNull(epic.getStartTime(),
                 "startTime не null для Epic");
@@ -78,7 +78,7 @@ public class InMemoryTaskManagerTest {
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
-        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+        inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
         Assertions.assertEquals(Duration.of(150, ChronoUnit.MINUTES),
                 epic.getDurationMinutes(),
@@ -87,7 +87,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void shouldReturnZeroIfEpicSubtasksDurationIsNull() {
-        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+        inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
         Assertions.assertEquals(0,
                 epic.getDurationMinutes().toMinutes(),
@@ -102,7 +102,7 @@ public class InMemoryTaskManagerTest {
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
-        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+        inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
         Assertions.assertEquals(LocalDateTime.parse("03-02-2023 18:20", formatter),
                 epic.getEndTime().get(),
@@ -116,7 +116,7 @@ public class InMemoryTaskManagerTest {
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
 
 
-        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+        inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
         Assertions.assertEquals(LocalDateTime.parse("01-01-2023 12:30", formatter),
                 epic.getEndTime().get(),
@@ -129,7 +129,7 @@ public class InMemoryTaskManagerTest {
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
-        inMemoryTaskManage.updateEpicStartTimeAndDuration(epic.getId());
+        inMemoryTaskManage.updateEpicStartTimeDurationEndTime(epic.getId());
 
         Assertions.assertEquals(LocalDateTime.parse("01-01-2023 12:30", formatter),
                 epic.getEndTime().get(),

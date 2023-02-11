@@ -7,12 +7,17 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path backupFilePath;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
     public FileBackedTaskManager(Path backupFilePath) {
         super();
@@ -20,7 +25,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     }
 
-    public FileBackedTaskManager(int idCounter, HashMap<ItemType, HashMap<Integer, Task>> allItems, HistoryManager historyManager, Path backupFilePath) {
+    public FileBackedTaskManager(int idCounter,
+                                 HashMap<ItemType,
+                                 HashMap<Integer, Task>> allItems,
+                                 HistoryManager historyManager,
+                                 Path backupFilePath) {
         super(idCounter, allItems, historyManager);
         this.backupFilePath = backupFilePath;
     }
@@ -63,6 +72,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         fileManager.addSubtask(testSubtask1, testEpic1);
         fileManager.addSubtask(testSubtask2, testEpic1);
 
+        testSubtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        testSubtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
+        testSubtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        testSubtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
         //Запись в историю
         fileManager.getItemById(testTask1.getId());
@@ -99,7 +112,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String historyIdsLine = "";
         HistoryManager restoredHistoryManager = Managers.getDefaultHistory();
 
-        //вычитываем даные из файла
+        //вычитываем данные из файла
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file.toFile()))) {
             while (fileReader.ready()) {
                 String line = fileReader.readLine();
@@ -174,8 +187,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 restoredHistoryManager.add(entrySet.get(Integer.parseInt(id)));
             }
         }
+        FileBackedTaskManager  restoredFileManager = new FileBackedTaskManager(restoredIdCounter,
+                restoredAllItems,
+                restoredHistoryManager,
+                file);
 
-        return new FileBackedTaskManager(restoredIdCounter, restoredAllItems, restoredHistoryManager, file);
+        //Восстанавливаем startTime / duration / EndTime для Epic
+        for (Integer epicId : epicsSubtasksIds.keySet()) {
+            restoredFileManager.updateEpicStartTimeDurationEndTime(epicId);
+        }
+
+        return restoredFileManager;
     }
 
     public static String historyToString(HistoryManager historyManager) {
@@ -194,38 +216,58 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static Task fromString(String value) {
         String[] taskParams = value.split(",");
-
-        //[0]:id, [1]:type, [2]:name, [3]:status, [4]:description, [5]:epic
+        LocalDateTime startTime = taskParams[5].equals("null") ? null : LocalDateTime.parse(taskParams[5], formatter);
+        Duration duration = taskParams[6].equals("null") ? null : Duration.parse(taskParams[6]);
+        // [0]:id,
+        // [1]:type,
+        // [2]:name,
+        // [3]:status,
+        // [4]:description,
+        // [5]:duration "PT8H6M12"
+        // [6]:startTime "dd-MM-yyyy HH:mm"
+        // [7]:epic
         switch (taskParams[1]) {
             case "TASK":
                 return new Task(Integer.parseInt(taskParams[0]),
                         taskParams[2],
                         taskParams[4],
                         Status.valueOf(taskParams[3]),
-                        ItemType.valueOf(taskParams[1]));
+                        ItemType.valueOf(taskParams[1]),
+                        duration,
+                        startTime);
             case "SUBTASK":
                 return new Subtask(Integer.parseInt(taskParams[0]),
                         taskParams[2],
                         taskParams[4],
                         Status.valueOf(taskParams[3]),
                         ItemType.valueOf(taskParams[1]),
-                        Integer.parseInt(taskParams[5]));
+                        duration,
+                        startTime,
+                        Integer.parseInt(taskParams[7]));
             case "EPIC":
                 return new Epic(Integer.parseInt(taskParams[0]),
                         taskParams[2],
                         taskParams[4],
                         Status.valueOf(taskParams[3]),
-                        ItemType.valueOf(taskParams[1]));
+                        ItemType.valueOf(taskParams[1]),
+                        duration,
+                        startTime);
             default:
                 return null;
-
         }
     }
 
     private void save() throws ManagerSaveException {
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(backupFilePath.toFile()))) {
             String header = String.join(",",
-                    "id", "type", "name", "status", "description", "epic\n");
+                    "id",
+                    "type",
+                    "name",
+                    "status",
+                    "description",
+                    "duration",
+                    "startTime",
+                    "epic\n");
 
             fileWriter.write(header);
             for (Task task : super.getAllItemsOfAllTypes()) {
@@ -246,6 +288,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         task.getName(),
                         String.valueOf(task.getStatus()),
                         task.getDescription(),
+                        (task.getStartTime() == null) ? "null" : task.getStartTime().format(formatter),
+                        (task.getDurationMinutes() == null) ? "null" : task.getDurationMinutes().toString()
                 };
 
         String line = String.join(",", lineElements);

@@ -2,6 +2,7 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,11 +38,9 @@ public class Epic extends Task {
                 Status status,
                 ItemType itemType,
                 Duration durationMinutes,
-                LocalDateTime startTime,
-                LocalDateTime endTime) {
+                LocalDateTime startTime) {
         super(id, name, description, status, itemType, durationMinutes, startTime);
         this.epicSubtaskIds = new ArrayList<>();
-        this.endTime = endTime;
     }
 
     public void setEndTime(LocalDateTime endTime) {
@@ -71,23 +70,52 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        String result = "Epic{" +
-                "id=" + id +
-                ", name='" + name + '\'';
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        StringBuilder sb = new StringBuilder("EPIC{");
+        sb.append("id=")
+                .append(id)
+                .append(", name='")
+                .append(name)
+                .append('\'');
         if (description != null) {
-            result = result + ", description.length()='" + description.length() + '\'';
+            sb.append(", description.length()='")
+                    .append(description.length())
+                    .append('\'');
         } else {
-            result = result + ", description.length()='null'";
+            sb.append(", description.length()='null'");
         }
-        result = result +
-                ", status='" + status + '\'';
+        sb.append(", status='")
+                .append(status)
+                .append('\'');
+        if (startTime != null) {
+            sb.append(", startTime='")
+                    .append(startTime.format(formatter))
+                    .append('\'');
+        } else {
+            sb.append(", startTime='null'");
+        }
+        if (durationMinutes !=null) {
+            sb.append(", duration='")
+                    .append(durationMinutes)
+                    .append('\'');
+        } else {
+            sb.append(", duration='null");
+        }
+        if (endTime != null) {
+            sb.append(", endTime='")
+                    .append(endTime.format(formatter))
+                    .append('\'');
+        } else {
+            sb.append(", endTime='null'");
+        }
         if (!epicSubtaskIds.isEmpty()) {
-            result = result + ", epicSubtaskIds={" + epicSubtaskIds +
-                    '}';
+            sb.append(", epicSubtaskIds={")
+                    .append(epicSubtaskIds);
         } else {
-            result = result + ", epicSubtaskIds='{empty}'" +
-                    '}';
+            sb.append(", epicSubtaskIds='{empty}'");
         }
-        return result;
+        sb.append('}');
+
+        return sb.toString();
     }
 }
