@@ -79,7 +79,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             return updatedAllItemsHistory;
         }
 
-        private void removeNode(HistoryRecord record) {
+        private void removeNode(HistoryRecord<Task> record) {
             if (taskIdMap.containsValue(record)) {
                 if (record.equals(this.head) && !record.equals(this.tail)) {
                     record.getNextRecord().setPrevRecord(null);

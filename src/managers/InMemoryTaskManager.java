@@ -104,7 +104,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateItem(Task anyItem, int id) throws NoSuchTaskExists {
         HashMap<Integer, Task> items;
-        if (getItemById(id) == null) {
+        if (getItemByIdWithoutSavingHistory(id) == null) {
             throw new NoSuchTaskExists("Задача с указанным Id не существует");
         }
         if (anyItem.getClass() == Task.class) {
@@ -133,13 +133,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeItemById(int id) throws NoSuchTaskExists {
-        if (getItemById(id) == null) {
+        if (getItemByIdWithoutSavingHistory(id) == null) {
             throw new NoSuchTaskExists("Нет задачи с таким id");
         }
-        Task currItem = getItemById(id);
+        Task currItem = getItemByIdWithoutSavingHistory(id);
         if (currItem.getClass() == Subtask.class) {
             Subtask currSubtask = (Subtask) currItem;
-            Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
+            Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(currSubtask.getEpicId());
             currEpic.deleteSubtaskById(id);
             for (HashMap<Integer, Task> hashmap : allItems.values()) {
                 hashmap.remove(id);
@@ -176,7 +176,7 @@ public class InMemoryTaskManager implements TaskManager {
             for (Task subtask : allItems.get(itemType).values()) {
                 Subtask currSubtask = (Subtask) subtask;
                 if (currSubtask.getEpicId() != 0) {
-                    Epic currEpic = (Epic) getItemById(currSubtask.getEpicId());
+                    Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(currSubtask.getEpicId());
                     currEpic.deleteSubtaskById(currSubtask.getId());
                     relatedEpicsId.add(currEpic.getId());
                 }
@@ -191,7 +191,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             for (Integer itemId : allItems.get(itemType).keySet()) {
                 historyManager.remove(itemId);
-                prioritizedItems.remove(getItemById(itemId));
+                prioritizedItems.remove(getItemByIdWithoutSavingHistory(itemId));
             }
             allItems.get(itemType).clear();
         }
@@ -222,13 +222,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public Task getItemById(int id) {
+        Task item = getItemByIdWithoutSavingHistory(id);
+        historyManager.add(item);
+        return item;
+    }
+    protected Task getItemByIdWithoutSavingHistory(int id) {
         Task item = null;
         for (HashMap<Integer, Task> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {
                 item = hashmap.get(id);
             }
         }
-        historyManager.add(item);
         return item;
     }
 
@@ -244,7 +248,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void updateEpicStatus(int epicId) {
-        Epic currEpic = (Epic) getItemById(epicId);
+        Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(epicId);
         if (getEpicSubtasks(epicId).isEmpty()) {
             currEpic.setStatus(Status.NEW);
         } else {
@@ -265,7 +269,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void updateEpicStartTimeDurationEndTime(int epicId) {
-        Epic currEpic = (Epic) getItemById(epicId);
+        Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(epicId);
         if (!getEpicSubtasks(epicId).isEmpty()) {
             //Обновляем startTime
             getEpicSubtasks(epicId).stream()
