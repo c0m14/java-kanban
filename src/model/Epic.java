@@ -33,7 +33,7 @@ public class Epic extends Task {
         this.epicSubtaskIds = new ArrayList<>();
         this.itemType = ItemType.EPIC;
     }
-    
+
     public Epic(int id,
                 String name,
                 String description,
