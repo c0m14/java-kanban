@@ -11,11 +11,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    private final Path backupFilePath;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    private final Path backupFilePath;
 
     public FileBackedTaskManager(Path backupFilePath) {
         super();
@@ -196,7 +199,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 restoredHistoryManager.add(entrySet.get(Integer.parseInt(id)));
             }
         }
-        FileBackedTaskManager  restoredFileManager = new FileBackedTaskManager(restoredIdCounter,
+        FileBackedTaskManager restoredFileManager = new FileBackedTaskManager(restoredIdCounter,
                 restoredAllItems,
                 restoredHistoryManager,
                 restoredPrioritizedItems,

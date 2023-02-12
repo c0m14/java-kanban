@@ -64,7 +64,7 @@ public class Subtask extends Task {
         } else {
             sb.append(", startTime='null'");
         }
-        if (durationMinutes !=null) {
+        if (durationMinutes != null) {
             sb.append(", duration='")
                     .append(durationMinutes)
                     .append('\'');

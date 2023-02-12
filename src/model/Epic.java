@@ -34,13 +34,13 @@ public class Epic extends Task {
         this.epicSubtaskIds = new ArrayList<>();
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
     @Override
     public Optional<LocalDateTime> getEndTime() {
         return Optional.of(this.endTime);
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public void addSubtask(Subtask subtask) {
@@ -85,7 +85,7 @@ public class Epic extends Task {
         } else {
             sb.append(", startTime='null'");
         }
-        if (durationMinutes !=null) {
+        if (durationMinutes != null) {
             sb.append(", duration='")
                     .append(durationMinutes)
                     .append('\'');

@@ -58,14 +58,6 @@ public class Task {
         this.startTime = startTime;
     }
 
-    public void setDurationMinutes(Duration durationMinutes) {
-        this.durationMinutes = durationMinutes;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
     public Optional<LocalDateTime> getEndTime() {
         if (this.startTime != null && this.durationMinutes != null) {
             return Optional.of(startTime.plusMinutes(durationMinutes.toMinutes()));
@@ -78,8 +70,16 @@ public class Task {
         return durationMinutes;
     }
 
+    public void setDurationMinutes(Duration durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
     public LocalDateTime getStartTime() {
         return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 
     public ItemType getItemType() {

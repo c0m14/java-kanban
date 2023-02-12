@@ -4,7 +4,6 @@ import model.ItemType;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 public interface TaskManager {
 

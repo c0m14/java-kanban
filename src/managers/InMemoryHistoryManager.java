@@ -39,14 +39,14 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int anyItemId) {
-        HistoryRecord<Task> currRecord = (HistoryRecord<Task>) historyList.getTaskIdMap().get(anyItemId);
+        HistoryRecord<Task> currRecord = historyList.getTaskIdMap().get(anyItemId);
         historyList.removeNode(currRecord);
     }
 
     private class HistoryRecordsLinkedList {
+        private final Map<Integer, HistoryRecord<Task>> taskIdMap;
         private HistoryRecord<Task> head;
         private HistoryRecord<Task> tail;
-        private final Map<Integer, HistoryRecord<Task>> taskIdMap;
 
         public HistoryRecordsLinkedList() {
             this.head = null;
