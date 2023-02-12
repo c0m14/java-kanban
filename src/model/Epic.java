@@ -27,15 +27,6 @@ public class Epic extends Task {
                 String name,
                 String description,
                 Status status,
-                ItemType itemType) {
-        super(id, name, description, status, itemType);
-        this.epicSubtaskIds = new ArrayList<>();
-    }
-
-    public Epic(int id,
-                String name,
-                String description,
-                Status status,
                 ItemType itemType,
                 Duration durationMinutes,
                 LocalDateTime startTime) {
