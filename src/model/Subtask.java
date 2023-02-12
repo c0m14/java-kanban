@@ -13,8 +13,18 @@ public class Subtask extends Task {
         this.itemType = ItemType.SUBTASK;
     }
 
+    public Subtask(String name) {
+        super(name);
+        this.itemType = ItemType.SUBTASK;
+    }
+
     public Subtask(int id, String name, String description) {
         super(id, name, description);
+        this.itemType = ItemType.SUBTASK;
+    }
+
+    public Subtask(String name, String description) {
+        super(name, description);
         this.itemType = ItemType.SUBTASK;
     }
 

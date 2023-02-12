@@ -25,8 +25,20 @@ public class Task {
         this.itemType = ItemType.TASK;
     }
 
+    public Task(String name) {
+        this.name = name;
+        this.description = "";
+        this.status = Status.NEW;
+        this.itemType = ItemType.TASK;
+    }
+
     public Task(int id, String name, String description) {
         this(id, name);
+        this.description = description;
+    }
+
+    public Task(String name, String description) {
+        this(name);
         this.description = description;
     }
 
