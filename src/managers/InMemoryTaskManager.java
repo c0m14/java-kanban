@@ -102,7 +102,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateItem(Task anyItem, int id) {
+    public void updateItem(Task anyItem, int id) throws NoSuchTaskExists {
         HashMap<Integer, Task> items;
         if (getItemById(id) == null) {
             throw new NoSuchTaskExists("Задача с указанным Id не существует");
@@ -132,7 +132,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void removeItemById(int id) {
+    public void removeItemById(int id) throws NoSuchTaskExists {
+        if (getItemById(id) == null) {
+            throw new NoSuchTaskExists("Нет задачи с таким id");
+        }
         Task currItem = getItemById(id);
         if (currItem.getClass() == Subtask.class) {
             Subtask currSubtask = (Subtask) currItem;
