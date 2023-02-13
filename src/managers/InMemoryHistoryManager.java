@@ -98,7 +98,7 @@ public class InMemoryHistoryManager implements HistoryManager {
                     record.setPrevRecord(null);
                     record.setNextRecord(null);
                 }
-                taskIdMap.remove(record);
+                taskIdMap.remove(record.getItem().getId());
             }
 
         }
