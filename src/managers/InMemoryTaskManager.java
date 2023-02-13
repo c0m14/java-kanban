@@ -116,6 +116,7 @@ public class InMemoryTaskManager implements TaskManager {
             items = allItems.get(ItemType.TASK);
             items.put(id, anyItem);
             allItems.put(ItemType.TASK, items);
+            prioritizedItems.add(anyItem);
         }
         if (anyItem.getClass() == Subtask.class) {
             checkIntervalAvailability(anyItem);
@@ -127,6 +128,7 @@ public class InMemoryTaskManager implements TaskManager {
             items = allItems.get(ItemType.SUBTASK);
             items.put(id, anyItem);
             allItems.put(ItemType.SUBTASK, items);
+            prioritizedItems.add(anyItem);
         }
         if (anyItem.getClass() == Epic.class) {
             items = allItems.get(ItemType.EPIC);
