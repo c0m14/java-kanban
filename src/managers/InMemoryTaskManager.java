@@ -139,38 +139,39 @@ public class InMemoryTaskManager implements TaskManager {
         Task currItem = getItemByIdWithoutSavingHistory(id);
         if (currItem.getClass() == Subtask.class) {
             Subtask currSubtask = (Subtask) currItem;
-            Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(currSubtask.getEpicId());
-            currEpic.deleteSubtaskById(id);
-            for (HashMap<Integer, Task> hashmap : allItems.values()) {
-                hashmap.remove(id);
+            if (currSubtask.getEpicId() != 0) {
+                Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(currSubtask.getEpicId());
+                currEpic.deleteSubtaskById(id);
+                updateEpicStatus(currEpic.getId());
+                updateEpicStartTimeDurationEndTime(currEpic.getId());
             }
-            updateEpicStatus(currEpic.getId());
-            updateEpicStartTimeDurationEndTime(currEpic.getId());
+            historyManager.remove(id);
+            allItems.get(ItemType.SUBTASK).remove(id);
         } else if (currItem.getClass() == Epic.class) {
             Epic currEpic = (Epic) currItem;
             List<Integer> currEpicSubtasksIds = new ArrayList<>(currEpic.getEpicSubtaskIds());
             if (currEpicSubtasksIds.size() > 0) {
                 for (Integer epicSubtaskId : currEpicSubtasksIds) {
-                    for (HashMap<Integer, Task> hashmap : allItems.values()) {
-                        hashmap.remove(epicSubtaskId);
-                    }
-                    historyManager.remove(epicSubtaskId);
+                    removeItemById(epicSubtaskId);
                 }
             }
-            for (HashMap<Integer, Task> hashmap : allItems.values()) {
-                hashmap.remove(id);
-            }
+            historyManager.remove(id);
+            allItems.get(ItemType.EPIC).remove(id);
         } else {
-            for (HashMap<Integer, Task> hashmap : allItems.values()) {
-                hashmap.remove(id);
-            }
+            historyManager.remove(id);
+            allItems.get(ItemType.TASK).remove(id);
         }
-        historyManager.remove(id);
         prioritizedItems.remove(currItem);
     }
 
-    @Override
     public void removeAllItemsByType(ItemType itemType) {
+        int[] ids = allItems.get(itemType).keySet().stream().mapToInt(key -> key).toArray();
+        for (int id : ids) {
+            removeItemById(id);
+        }
+    }
+
+    public void removeAllItemsByTypeOld(ItemType itemType) {
         if (itemType.equals(ItemType.SUBTASK)) {
             ArrayList<Integer> relatedEpicsId = new ArrayList<>();
             for (Task subtask : allItems.get(itemType).values()) {
@@ -188,6 +189,17 @@ public class InMemoryTaskManager implements TaskManager {
                 updateEpicStatus(id);
                 updateEpicStartTimeDurationEndTime(id);
             }
+        } else if (itemType.equals(ItemType.EPIC)) {
+            for (Integer itemId : allItems.get(ItemType.EPIC).keySet()) {
+                Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(itemId);
+                List<Integer> currEpicSubtasksId = currEpic.getEpicSubtaskIds();
+                if (!currEpicSubtasksId.isEmpty()) {
+                    currEpicSubtasksId.stream().forEach(this::removeItemById);
+                }
+                historyManager.remove(itemId);
+                prioritizedItems.remove(getItemByIdWithoutSavingHistory(itemId));
+            }
+            allItems.get(itemType).clear();
         } else {
             for (Integer itemId : allItems.get(itemType).keySet()) {
                 historyManager.remove(itemId);

@@ -341,8 +341,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void removeAllItemsByType(ItemType itemType) {
-        super.removeAllItemsByType(itemType);
+    public void removeAllItemsByTypeOld(ItemType itemType) {
+        super.removeAllItemsByTypeOld(itemType);
         save();
     }
 
