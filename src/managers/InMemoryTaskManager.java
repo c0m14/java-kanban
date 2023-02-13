@@ -205,6 +205,7 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.add(item);
         return item;
     }
+
     protected Task getItemByIdWithoutSavingHistory(int id) {
         Task item = null;
         for (HashMap<Integer, Task> hashmap : allItems.values()) {
