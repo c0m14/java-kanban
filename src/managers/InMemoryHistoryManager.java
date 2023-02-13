@@ -67,7 +67,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             taskIdMap.put(item.getId(), historyRecord);
         }
 
-        public List<Task> getItems() {
+        private List<Task> getItems() {
             List<Task> updatedAllItemsHistory = new ArrayList<>();
             HistoryRecord<Task> currentRecord = historyList.head;
 
@@ -103,7 +103,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         }
 
-        public Map<Integer, HistoryRecord<Task>> getTaskIdMap() {
+        private Map<Integer, HistoryRecord<Task>> getTaskIdMap() {
             return taskIdMap;
         }
 
