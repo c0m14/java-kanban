@@ -176,44 +176,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void removeAllItemsByTypeOld(ItemType itemType) {
-        if (itemType.equals(ItemType.SUBTASK)) {
-            ArrayList<Integer> relatedEpicsId = new ArrayList<>();
-            for (Task subtask : allItems.get(itemType).values()) {
-                Subtask currSubtask = (Subtask) subtask;
-                if (currSubtask.getEpicId() != 0) {
-                    Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(currSubtask.getEpicId());
-                    currEpic.deleteSubtaskById(currSubtask.getId());
-                    relatedEpicsId.add(currEpic.getId());
-                }
-                historyManager.remove(currSubtask.getId());
-                prioritizedItems.remove(currSubtask);
-            }
-            allItems.get(itemType).clear();
-            for (Integer id : relatedEpicsId) {
-                updateEpicStatus(id);
-                updateEpicStartTimeDurationEndTime(id);
-            }
-        } else if (itemType.equals(ItemType.EPIC)) {
-            for (Integer itemId : allItems.get(ItemType.EPIC).keySet()) {
-                Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(itemId);
-                List<Integer> currEpicSubtasksId = currEpic.getEpicSubtaskIds();
-                if (!currEpicSubtasksId.isEmpty()) {
-                    currEpicSubtasksId.stream().forEach(this::removeItemById);
-                }
-                historyManager.remove(itemId);
-                prioritizedItems.remove(getItemByIdWithoutSavingHistory(itemId));
-            }
-            allItems.get(itemType).clear();
-        } else {
-            for (Integer itemId : allItems.get(itemType).keySet()) {
-                historyManager.remove(itemId);
-                prioritizedItems.remove(getItemByIdWithoutSavingHistory(itemId));
-            }
-            allItems.get(itemType).clear();
-        }
-    }
-
     @Override
     public ArrayList<Task> getPrioritizedTasks() {
         return new ArrayList<>(prioritizedItems);
