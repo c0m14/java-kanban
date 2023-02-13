@@ -43,6 +43,10 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager;
     }
 
+    public void setIdCounter(int idCounter) {
+        this.idCounter = idCounter;
+    }
+
     @Override
     public int createItem(Task anyItem) {
         HashMap<Integer, Task> items;
@@ -142,6 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (currSubtask.getEpicId() != 0) {
                 Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(currSubtask.getEpicId());
                 currEpic.deleteSubtaskById(id);
+                currSubtask.setEpicId(0);
                 updateEpicStatus(currEpic.getId());
                 updateEpicStartTimeDurationEndTime(currEpic.getId());
             }
