@@ -213,7 +213,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return restoredFileManager;
     }
 
-    public static String historyToString(HistoryManager historyManager) {
+    private static String historyToString(HistoryManager historyManager) {
         StringBuilder historyIdBuilder = new StringBuilder();
         List<Task> historyList = historyManager.getHistory();
         for (int i = 0; i < historyList.size(); i++) {
@@ -227,10 +227,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return historyIdBuilder.toString();
     }
 
-    public static Task fromString(String value) {
+    private static Task fromString(String value) {
         String[] taskParams = value.split(",");
-        LocalDateTime startTime = taskParams[5].equals("null") ? null : LocalDateTime.parse(taskParams[5], formatter);
-        Duration duration = taskParams[6].equals("null") ? null : Duration.parse(taskParams[6]);
+        LocalDateTime startTime = taskParams[5].equals("") ? null : LocalDateTime.parse(taskParams[5], formatter);
+        Duration duration = taskParams[6].equals("") ? null : Duration.parse(taskParams[6]);
         // [0]:id,
         // [1]:type,
         // [2]:name,
@@ -301,8 +301,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         task.getName(),
                         String.valueOf(task.getStatus()),
                         task.getDescription(),
-                        (task.getStartTime() == null) ? "null" : task.getStartTime().format(formatter),
-                        (task.getDurationMinutes() == null) ? "null" : task.getDurationMinutes().toString()
+                        (task.getStartTime() == null) ? "" : task.getStartTime().format(formatter),
+                        (task.getDurationMinutes() == null) ? "" : task.getDurationMinutes().toString()
                 };
 
         String line = String.join(",", lineElements);
