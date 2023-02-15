@@ -16,17 +16,17 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class TaskManagerTest <T extends TaskManager> {
-    protected T taskManager;
+public abstract class TaskManagerTest<T extends TaskManager> {
     protected static DateTimeFormatter formatter;
+    protected T taskManager;
+
+    @BeforeAll
+    public static void beforeAll() {
+        formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    }
 
     protected void setTaskManager() {
         this.taskManager = (T) Managers.getDefault();
-    }
-
-    @BeforeAll
-    public static void beforeAll(){
-        formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     }
 
     @BeforeEach
@@ -143,7 +143,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
     }
 
     @Test
-    public void shouldNotCreateTaskOfNull(){
+    public void shouldNotCreateTaskOfNull() {
         Task task = null;
 
         assertThrows(NullPointerException.class,
@@ -153,11 +153,11 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
     //Получение списка задач
     @Test
-    public void shouldReturnEmptyListIfTasksOfGivenTypeDoNotExist(){
+    public void shouldReturnEmptyListIfTasksOfGivenTypeDoNotExist() {
 
         assertThrows(NullPointerException.class,
                 () -> taskManager.getAllItemsByType(ItemType.TASK),
-        "Список не пустой");
+                "Список не пустой");
 
         assertThrows(NullPointerException.class,
                 () -> taskManager.getAllItemsByType(ItemType.SUBTASK),
@@ -253,7 +253,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
         assertThrows(NoSuchTaskExists.class,
                 () -> taskManager.updateItem(new Task("Новая задача"), 1),
-        "Обновлена задача с несуществующим Id");
+                "Обновлена задача с несуществующим Id");
     }
 
     @Test
@@ -644,33 +644,80 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
     //Тесты приоритизации задач
     @Test
-    public void shouldReturnRightOrderByStartTimeASC() {
+    public void shouldPrioritizeByStartTimeWhenCreate() {
+        //Эпик не попадает в список
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
 
+        //Подзадачи и проверка сортировки
         Subtask subtask1 = new Subtask("subtask1");
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         taskManager.createItem(subtask1);
         ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
 
         Subtask subtask2 = new Subtask("subtask2");
+        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
         taskManager.createItem(subtask2);
         ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
 
+        //null сравнивается с задачей
         Subtask subtask3WithOutStartDate = new Subtask("subtask3WithOutStartDate");
         taskManager.createItem(subtask3WithOutStartDate);
         ((InMemoryTaskManager) taskManager).addSubtask(subtask3WithOutStartDate, epic);
 
-        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
-        taskManager.updateItem(subtask1, subtask1.getId());
-
-        subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
-        taskManager.updateItem(subtask2, subtask2.getId());
+        //Задача сравнивается с null
+        Task task = new Task("task");
+        task.setStartTime(LocalDateTime.parse("05-02-2023 12:20", formatter));
+        taskManager.createItem(task);
 
         List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
 
-        Assertions.assertEquals(prioritizedTasks.get(0), subtask1);
-        Assertions.assertEquals(prioritizedTasks.get(1), subtask2);
-        Assertions.assertEquals(prioritizedTasks.get(2), subtask3WithOutStartDate);
+        Assertions.assertEquals(subtask1, prioritizedTasks.get(0), "Ошибка сортировки задач");
+        Assertions.assertEquals(subtask2, prioritizedTasks.get(1), "Ошибка сортировки задач");
+        Assertions.assertEquals(task, prioritizedTasks.get(2), "Ошибка сортировки задач");
+        Assertions.assertEquals(subtask3WithOutStartDate, prioritizedTasks.get(3), "Ошибка сортировки задач");
+    }
+
+    @Test
+    public void shouldPrioritizeByStartTimeWhenUpdate() {
+        Task task = new Task("task");
+        task.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        taskManager.createItem(task);
+        Subtask subtask = new Subtask("subtask");
+        subtask.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
+        taskManager.createItem(subtask);
+
+        //Обновление задачи
+        Task updatedTask = new Task("task");
+        updatedTask.setStartTime(LocalDateTime.parse("03-01-2023 12:00", formatter));
+        updatedTask.setId(task.getId());
+        taskManager.updateItem(updatedTask, updatedTask.getId());
+
+        assertEquals(taskManager.getPrioritizedTasks().get(0), subtask, "Ошибка приоритезации");
+        assertEquals(taskManager.getPrioritizedTasks().get(1), updatedTask, "Ошибка приоритезации");
+
+        //Обновление подзадачи
+        Subtask updatedSubtask = new Subtask("subtask");
+        updatedSubtask.setStartTime(LocalDateTime.parse("04-01-2023 12:00", formatter));
+        updatedSubtask.setId(subtask.getId());
+        taskManager.updateItem(updatedSubtask, updatedSubtask.getId());
+
+        assertEquals(taskManager.getPrioritizedTasks().get(0), updatedTask, "Ошибка приоритезации");
+        assertEquals(taskManager.getPrioritizedTasks().get(1), updatedSubtask, "Ошибка приоритезации");
+    }
+
+    @Test
+    public void shouldPrioritizeByStartTimeWhenRemove() {
+        Task task = new Task("task");
+        task.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
+        taskManager.createItem(task);
+        Subtask subtask = new Subtask("subtask");
+        subtask.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
+        taskManager.createItem(subtask);
+
+        taskManager.removeItemById(task.getId());
+
+        assertEquals(taskManager.getPrioritizedTasks().get(0), subtask, "Ошибка приоритезации");
     }
 
     //Тесты проверки пересечения задач
@@ -696,7 +743,8 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
         Assertions.assertThrows(TaskTimeIntersectionException.class,
-                () -> taskManager.updateItem(subtask2, subtask2.getId()));
+                () -> taskManager.updateItem(subtask2, subtask2.getId()),
+                "Задачи пересекаются");
     }
 
     @Test
@@ -721,7 +769,8 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         subtask2.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
 
         Assertions.assertThrows(TaskTimeIntersectionException.class,
-                () -> taskManager.updateItem(subtask2, subtask2.getId()));
+                () -> taskManager.updateItem(subtask2, subtask2.getId()),
+                "Задачи пересекаются");
     }
 
     @Test
@@ -746,7 +795,8 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         subtask2.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
 
         Assertions.assertThrows(TaskTimeIntersectionException.class,
-                () -> taskManager.updateItem(subtask2, subtask2.getId()));
+                () -> taskManager.updateItem(subtask2, subtask2.getId()),
+                "Задачи пересекаются");
     }
 
 }

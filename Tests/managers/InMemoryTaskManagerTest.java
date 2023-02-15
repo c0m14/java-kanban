@@ -1,11 +1,10 @@
 package managers;
 
-import org.junit.jupiter.api.BeforeEach;
+public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
-public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager>{
-
-    @BeforeEach
-    public void beforeEach() {
+    @Override
+    protected void setTaskManager() {
         taskManager = (InMemoryTaskManager) Managers.getDefault();
     }
+
 }
