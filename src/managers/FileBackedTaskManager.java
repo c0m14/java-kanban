@@ -4,13 +4,10 @@ import exceptions.ManagerSaveException;
 import model.*;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -126,7 +123,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         //Восстанавливаем историю
         String[] historyIdsFromLine = historyIdsLine.split(",");
-        if (!historyIdsLine.equals("")){
+        if (!historyIdsLine.equals("")) {
             for (String id : historyIdsFromLine) {
                 for (HashMap<Integer, Task> entrySet : restoredAllItems.values()) {
                     restoredHistoryManager.add(entrySet.get(Integer.parseInt(id)));

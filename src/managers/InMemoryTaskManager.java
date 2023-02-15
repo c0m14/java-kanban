@@ -43,10 +43,6 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager;
     }
 
-    public void setIdCounter(int idCounter) {
-        this.idCounter = idCounter;
-    }
-
     @Override
     public int createItem(Task anyItem) {
         HashMap<Integer, Task> items;
@@ -96,6 +92,10 @@ public class InMemoryTaskManager implements TaskManager {
         return idCounter;
     }
 
+    public void setIdCounter(int idCounter) {
+        this.idCounter = idCounter;
+    }
+
     @Override
     public ArrayList<Task> getAllItemsByType(ItemType itemType) {
         ArrayList<Task> itemsByChosenType = new ArrayList<>();
@@ -112,9 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
             throw new NoSuchTaskExists("Задача с указанным Id не существует");
         }
         Task itemToChange = getItemByIdWithoutSavingHistory(anyItem.getId());
-        if (prioritizedItems.contains(itemToChange)) {
-            prioritizedItems.remove(itemToChange);
-        }
+        prioritizedItems.remove(itemToChange);
         if (anyItem.getClass() == Task.class) {
             checkIntervalAvailability(anyItem);
             items = allItems.get(ItemType.TASK);
