@@ -101,7 +101,7 @@ public class Epic extends Task {
                     .append(durationMinutes)
                     .append('\'');
         } else {
-            sb.append(", duration='null");
+            sb.append(", duration='null'");
         }
         if (endTime != null) {
             sb.append(", endTime='")

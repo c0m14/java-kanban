@@ -79,7 +79,7 @@ public class Subtask extends Task {
                     .append(durationMinutes)
                     .append('\'');
         } else {
-            sb.append(", duration='null");
+            sb.append(", duration='null', ");
         }
         sb.append(epicId)
                 .append('}');

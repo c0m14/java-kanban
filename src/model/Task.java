@@ -161,14 +161,14 @@ public class Task {
                     .append(durationMinutes)
                     .append('\'');
         } else {
-            sb.append(", duration='null");
+            sb.append(", duration='null'");
         }
         sb.append('}');
 
         return sb.toString();
     }
 
-    @Override
+/*    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -177,14 +177,11 @@ public class Task {
             return false;
         }
         Task task = (Task) o;
-        return id == task.id &&
-                name.equals(task.name) &&
-                Objects.equals(description, task.description) &&
-                status.equals(task.status);
+        return id == task.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, id, status);
-    }
+        return Objects.hash(id);
+    }*/
 }
