@@ -50,9 +50,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int createItem(Task anyItem) {
         HashMap<Integer, Task> items;
-        if (prioritizedItems.contains(anyItem)) {
-            prioritizedItems.remove(anyItem);
-        }
         if (anyItem.getClass() == Task.class) {
             checkIntervalAvailability(anyItem);
             if (allItems.get(ItemType.TASK) != null) {
@@ -114,14 +111,15 @@ public class InMemoryTaskManager implements TaskManager {
         if (getItemByIdWithoutSavingHistory(id) == null) {
             throw new NoSuchTaskExists("Задача с указанным Id не существует");
         }
+        Task itemToChange = getItemByIdWithoutSavingHistory(anyItem.getId());
+        if (prioritizedItems.contains(itemToChange)) {
+            prioritizedItems.remove(itemToChange);
+        }
         if (anyItem.getClass() == Task.class) {
             checkIntervalAvailability(anyItem);
             items = allItems.get(ItemType.TASK);
             items.put(id, anyItem);
             allItems.put(ItemType.TASK, items);
-            if (prioritizedItems.contains(anyItem)) {
-                prioritizedItems.remove(anyItem);
-            }
             prioritizedItems.add(anyItem);
         }
         if (anyItem.getClass() == Subtask.class) {
