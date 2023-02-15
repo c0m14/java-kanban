@@ -19,13 +19,13 @@ public class InMemoryTaskManager implements TaskManager {
         this.allItems = new HashMap<>();
         this.historyManager = Managers.getDefaultHistory();
         this.prioritizedItems = new TreeSet<>((task1, task2) -> {
-            if (task1.getStartTime() == null && task2.getStartTime() == null) {
-                return 2;
-            } else if (task1.getStartTime() == null && task2.getStartTime() != null) {
+            if (task1.getStartTime() == null) {
                 return 1;
-            } else if (task1.getStartTime() != null && task2.getStartTime() == null) {
+            } else if (task2.getStartTime() == null) {
                 return -1;
-            } else return task1.getStartTime().compareTo(task2.getStartTime());
+            } else {
+                return task1.getStartTime().compareTo(task2.getStartTime());
+            }
         });
     }
 
@@ -50,6 +50,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int createItem(Task anyItem) {
         HashMap<Integer, Task> items;
+        if (prioritizedItems.contains(anyItem)) {
+            prioritizedItems.remove(anyItem);
+        }
         if (anyItem.getClass() == Task.class) {
             checkIntervalAvailability(anyItem);
             if (allItems.get(ItemType.TASK) != null) {
@@ -116,6 +119,9 @@ public class InMemoryTaskManager implements TaskManager {
             items = allItems.get(ItemType.TASK);
             items.put(id, anyItem);
             allItems.put(ItemType.TASK, items);
+            if (prioritizedItems.contains(anyItem)) {
+                prioritizedItems.remove(anyItem);
+            }
             prioritizedItems.add(anyItem);
         }
         if (anyItem.getClass() == Subtask.class) {
@@ -134,6 +140,8 @@ public class InMemoryTaskManager implements TaskManager {
             items = allItems.get(ItemType.EPIC);
             items.put(id, anyItem);
             allItems.put(ItemType.EPIC, items);
+            prioritizedItems.remove(anyItem);
+            prioritizedItems.add(anyItem);
         }
     }
 

@@ -107,13 +107,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
         HashMap<Integer, Task> items;
         TreeSet<Task> restoredPrioritizedItems = new TreeSet<>((task1, task2) -> {
-            if (task1.getStartTime() == null && task2.getStartTime() == null) {
-                return 2;
-            } else if (task1.getStartTime() == null && task2.getStartTime() != null) {
+            if (task1.getStartTime() == null || task2.getStartTime() == null) {
                 return 1;
-            } else if (task1.getStartTime() != null && task2.getStartTime() == null) {
-                return -1;
-            } else return task1.getStartTime().compareTo(task2.getStartTime());
+            } else {
+                return task1.getStartTime().compareTo(task2.getStartTime());
+            }
         });
 
         HashMap<Integer, List<Integer>> epicsSubtasksIds = new HashMap<>();
