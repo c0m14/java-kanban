@@ -131,7 +131,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
         }
 
-        String[] line1 = fileLines.get(0).split(",");
+        String[] line1 = fileLines.get(2).split(",");
 
         assertEquals("2", line1[0], "Неверное расположение полей в файле");
         assertEquals("SUBTASK", line1[1], "Неверное расположение полей в файле");
