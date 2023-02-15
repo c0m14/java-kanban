@@ -191,7 +191,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         //Восстанавливаем историю
         String[] historyIdsFromLine = historyIdsLine.split(",");
-        if (historyIdsFromLine.equals("")){
+        if (!historyIdsLine.equals("")){
             for (String id : historyIdsFromLine) {
                 for (HashMap<Integer, Task> entrySet : restoredAllItems.values()) {
                     restoredHistoryManager.add(entrySet.get(Integer.parseInt(id)));
