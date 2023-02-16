@@ -209,6 +209,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 () -> taskManager.getAllItemsByType(ItemType.SUBTASK),
                 "Список не пустой");
     }
+
     @Test
     public void shouldReturnEmptyListIfEpicsDoNotExist() {
         assertThrows(NullPointerException.class,
@@ -310,7 +311,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void shouldUpdateEpicStatusToNewIfOnlySubtaskIsNew(){
+    public void shouldUpdateEpicStatusToNewIfOnlySubtaskIsNew() {
         //Подготовка данных
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
@@ -326,7 +327,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void shouldUpdateEpicStatusToInProgressIfOnlySubtaskIsInProgress(){
+    public void shouldUpdateEpicStatusToInProgressIfOnlySubtaskIsInProgress() {
         //Подготовка данных
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
@@ -345,7 +346,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void shouldUpdateEpicStatusToNewIfOneOfSubtaskIsNew(){
+    public void shouldUpdateEpicStatusToNewIfOneOfSubtaskIsNew() {
         //Подготовка данных
         Subtask subtask1 = new Subtask("subtask1");
         subtask1.setStatus(Status.IN_PROGRESS);
@@ -365,7 +366,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void shouldUpdateEpicStatusToNewIfAllSubtasksIsNew(){
+    public void shouldUpdateEpicStatusToNewIfAllSubtasksIsNew() {
         //Подготовка данных
         Subtask subtask1 = new Subtask("subtask1");
         subtask1.setStatus(Status.IN_PROGRESS);
@@ -946,7 +947,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     //Тесты приоритизации задач
     @Test
-    public void shouldNotAddEpicToPrioritizedList(){
+    public void shouldNotAddEpicToPrioritizedList() {
         //Подготовка данных
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
