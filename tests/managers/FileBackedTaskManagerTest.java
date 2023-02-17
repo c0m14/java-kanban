@@ -8,6 +8,7 @@ import model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,11 +34,18 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager = (FileBackedTaskManager) Managers.getDefault(autosaveFile);
     }
 
+    private void readAutosaveFile() {
+        try {
+            fileLines = Files.readAllLines(autosaveFile);
+        } catch (IOException e) {
+            fileLines = Collections.emptyList();
+        }
+    }
+
     @BeforeEach
     public void beforeEach() {
         setTaskManager();
         taskManager.setIdCounter(1);
-
         // очистка файла
         try {
             if (Files.exists(autosaveFile)) {
@@ -51,14 +60,12 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     //Тесты на создание файла
     @Test
     public void shouldCreateHeaderInFile() {
+        //Тестируемая логика
         taskManager.createItem(new Task("task1", "task1_description"));
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
 
-        }
+        //Проверка заполнения файла
+        readAutosaveFile();
         String[] header = fileLines.get(0).split(",");
-
         assertEquals(header[0], "id", "Неверное расположение полей в файле");
         assertEquals(header[1], "type", "Неверное расположение полей в файле");
         assertEquals(header[2], "name", "Неверное расположение полей в файле");
@@ -71,17 +78,15 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void shouldWriteToFileTaskWithMinimumFields() {
+        //Подготовка данных
         Task task1 = new Task("task1");
+
+        //Тестируемая логика
         taskManager.createItem(task1);
 
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
-
-        }
-
+        //Проверка заполнения файла
+        readAutosaveFile();
         String[] line1 = fileLines.get(1).split(",");
-
         assertEquals("1", line1[0], "Неверное расположение полей в файле");
         assertEquals("TASK", line1[1], "Неверное расположение полей в файле");
         assertEquals("task1", line1[2], "Неверное расположение полей в файле");
@@ -93,19 +98,17 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void shouldWriteToFileTaskWithAllFields() {
+        //Подготовка данных
         Task task1 = new Task("task1", "task1_description");
         task1.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
         task1.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
+
+        //Тестируемая логика
         taskManager.createItem(task1);
 
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
-
-        }
-
+        //Проверка заполнения файла
+        readAutosaveFile();
         String[] line1 = fileLines.get(1).split(",");
-
         assertEquals("1", line1[0], "Неверное расположение полей в файле");
         assertEquals("TASK", line1[1], "Неверное расположение полей в файле");
         assertEquals("task1", line1[2], "Неверное расположение полей в файле");
@@ -117,22 +120,20 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void shouldCreateSubtaskWithAllFields() {
+        //Подготовка данных
         Subtask subtask1 = new Subtask("subtask1", "subtask1_description");
         subtask1.setStartTime(LocalDateTime.parse("05-01-2023 12:00", formatter));
         subtask1.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
         Epic epic = new Epic("epic");
+
+        //Тестируемая логика
         taskManager.createItem(epic);
         taskManager.createItem(subtask1);
         taskManager.addSubtask(subtask1, epic);
 
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
-
-        }
-
+        //Проверка заполнения файла
+        readAutosaveFile();
         String[] line1 = fileLines.get(2).split(",");
-
         assertEquals("2", line1[0], "Неверное расположение полей в файле");
         assertEquals("SUBTASK", line1[1], "Неверное расположение полей в файле");
         assertEquals("subtask1", line1[2], "Неверное расположение полей в файле");
@@ -146,96 +147,90 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void shouldWriteHistoryToFileAfterBlancLine() {
-        //Создание тестовых items
+        //Подготовка данных
         Task task1 = new Task("task1", "task1_description");
         taskManager.createItem(task1);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
 
-        //Запись истории
+        //Тестируемая логика
         taskManager.getItemById(subtask1.getId());
         taskManager.getItemById(task1.getId());
 
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
-
-        }
-
+        //Проверка заполнения файла
+        readAutosaveFile();
         String[] historyLine = fileLines.get(4).split(",");
-
         assertEquals("2", historyLine[0], "Неверное отображение истории");
         assertEquals("1", historyLine[1], "Неверное отображение истории");
     }
 
     @Test
     public void shouldDeleteItemFromFileIfItemIsRemovedById() {
+        //Подготовка данных
         Task task = new Task("task");
         taskManager.createItem(task);
+
+        //Тестируемая логика
         taskManager.removeItemById(task.getId());
 
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
-
-        }
-
+        //Проверка заполнения файла
+        readAutosaveFile();
         assertEquals("", fileLines.get(1), "Задача не удалена из файла");
     }
 
     @Test
     public void shouldDeleteItemFromFileIfItemIsRemovedByType() {
+        //Подготовка данных
         Task task1 = new Task("task1");
         Task task2 = new Task("task2");
         taskManager.createItem(task1);
         taskManager.createItem(task2);
+
+        //Тестируемая логика
         taskManager.removeAllItemsByType(ItemType.TASK);
 
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
-
-        }
-
+        //Проверка заполнения файла
+        readAutosaveFile();
         assertEquals("", fileLines.get(1), "Задачи не удалены из файла");
     }
 
     @Test
     public void shouldUpdateFileWhenItemIsUpdate() {
+        //Подготовка данных
         Task task = new Task("task");
         taskManager.createItem(task);
         Task updatedTask = new Task("task", "added_description");
         updatedTask.setId(task.getId());
+
+        //Тестируемая логика
         taskManager.updateItem(updatedTask, task.getId());
 
-        try {
-            fileLines = Files.readAllLines(autosaveFile);
-        } catch (IOException e) {
-
-        }
-
+        //Проверка заполнения файла
+        readAutosaveFile();
         String[] historyLine = fileLines.get(1).split(",");
-
         assertEquals("added_description", historyLine[4], "Задача не обновлена");
     }
 
     @Test
     public void shouldThrowExceptionIfErrorWhileSavingToFile() {
-        FileBackedTaskManager badManager = (FileBackedTaskManager) Managers.getDefault(
+        //Подготовка данных
+        TaskManager badManager = Managers.getDefault(
                 Paths.get("C://ProgramFiles/project_files/autosaveTest.txt"));
-
         Task task = new Task("task");
 
+        //Тестируемая логика
+        Executable executable = () -> badManager.createItem(task);
+
+        //Проверка исключения
         Assertions.assertThrows(ManagerSaveException.class,
-                () -> badManager.createItem(task),
+                executable,
                 "Пропущена ошибка сохранения в файл");
     }
 
     //Восстановление из файла
     @Test
     public void shouldRestoreAllItemsFromFile() {
-
-        //Подготовка менеджера
+        //Подготовка данных
         Task task = new Task("task");
         taskManager.createItem(task);
         Epic epic1 = new Epic("epic1");
@@ -252,6 +247,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager.createItem(subtask3);
         taskManager.addSubtask(subtask3, epic1);
 
+        //Тестируемая логика
         FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
 
         //Проверка полноты восстановления
@@ -261,6 +257,29 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
                 "Не все задачи восстановлены");
         assertEquals(3, restoredManager.getAllItemsByType(ItemType.SUBTASK).size(),
                 "Не все задачи восстановлены");
+    }
+
+    @Test
+    public void shouldRestoreInfoAboutEpicsForSubtasks() {
+        //Подготовка данных
+        Task task = new Task("task");
+        taskManager.createItem(task);
+        Epic epic1 = new Epic("epic1");
+        taskManager.createItem(epic1);
+        Epic epic2 = new Epic("epic2");
+        taskManager.createItem(epic2);
+        Subtask subtask1 = new Subtask("subtask1");
+        taskManager.createItem(subtask1);
+        taskManager.addSubtask(subtask1, epic1);
+        Subtask subtask2 = new Subtask("subtask2");
+        taskManager.createItem(subtask2);
+        taskManager.addSubtask(subtask2, epic1);
+        Subtask subtask3 = new Subtask("subtask3");
+        taskManager.createItem(subtask3);
+        taskManager.addSubtask(subtask3, epic1);
+
+        //Тестируемая логика
+        FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
 
         //Проверка знания подзадач об эпиках
         assertEquals(epic1.getId(), ((Subtask) restoredManager.getItemById(subtask1.getId())).getEpicId(),
@@ -269,6 +288,29 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
                 "Подзадача не привязана к эпику");
         assertEquals(epic1.getId(), ((Subtask) restoredManager.getItemById(subtask3.getId())).getEpicId(),
                 "Подзадача не привязана к эпику");
+    }
+
+    @Test
+    public void shouldRestoreAllInfoAboutSubtasksInEpics() {
+        //Подготовка данных
+        Task task = new Task("task");
+        taskManager.createItem(task);
+        Epic epic1 = new Epic("epic1");
+        taskManager.createItem(epic1);
+        Epic epic2 = new Epic("epic2");
+        taskManager.createItem(epic2);
+        Subtask subtask1 = new Subtask("subtask1");
+        taskManager.createItem(subtask1);
+        taskManager.addSubtask(subtask1, epic1);
+        Subtask subtask2 = new Subtask("subtask2");
+        taskManager.createItem(subtask2);
+        taskManager.addSubtask(subtask2, epic1);
+        Subtask subtask3 = new Subtask("subtask3");
+        taskManager.createItem(subtask3);
+        taskManager.addSubtask(subtask3, epic1);
+
+        //Тестируемая логика
+        FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
 
         //Проверка знания эпиков о подзадачах
         assertTrue(((Epic) restoredManager.
@@ -276,13 +318,11 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
                         .getEpicSubtaskIds()
                         .contains(subtask1.getId()),
                 "Подзадача не привязана к эпику");
-
         assertTrue(((Epic) restoredManager.
                         getItemById(epic1.getId()))
                         .getEpicSubtaskIds()
                         .contains(subtask2.getId()),
                 "Подзадача не привязана к эпику");
-
         assertTrue(((Epic) restoredManager.
                         getItemById(epic1.getId()))
                         .getEpicSubtaskIds()
@@ -292,18 +332,20 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void shouldRestoreHistoryFromFile() {
+        //Подготовка данных
         Task task = new Task("task");
         taskManager.createItem(task);
         Epic epic = new Epic("epic1");
         taskManager.createItem(epic);
-
         taskManager.getItemById(task.getId());
         taskManager.getItemById(epic.getId());
 
+        //Тестируемая логика
         FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
         HistoryManager restoredHistoryManager = restoredManager.getHistoryManager();
         List<Task> history = restoredHistoryManager.getHistory();
 
+        //Проверка истории
         assertEquals(task.getId(), history.get(0).getId(),
                 "Ошибка восстановления истории");
         assertEquals(epic.getId(), history.get(1).getId(),
@@ -312,6 +354,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void shouldRestorePrioritizedListFromFile() {
+        //Подготовка данных
         Task task1 = new Task("task1");
         task1.setStartTime(LocalDateTime.parse("01-01-2023 11:50", formatter));
         taskManager.createItem(task1);
@@ -322,9 +365,11 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         task3.setStartTime(LocalDateTime.parse("03-01-2023 11:50", formatter));
         taskManager.createItem(task3);
 
+        //Тестируемая логика
         FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
         ArrayList<Task> restoredPrioritizedList = restoredManager.getPrioritizedTasks();
 
+        //Проверка списка приоритетных задач
         assertEquals(task1.getId(), restoredPrioritizedList.get(0).getId(),
                 "Ошибка восстановления задач по приоритету");
         assertEquals(task2.getId(), restoredPrioritizedList.get(1).getId(),
@@ -335,6 +380,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void shouldCalculateEpicEndTimeWhileBeingRestored() {
+        //Подготовка данных
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
@@ -347,13 +393,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager.createItem(subtask2);
         taskManager.addSubtask(subtask1, epic);
         taskManager.addSubtask(subtask2, epic);
-
         taskManager.updateEpicStartTimeDurationEndTime(epic.getId());
 
+        //Тестируемая логика
         FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
 
+        //Проверка времени эпика
         Epic restoredEpic = (Epic) restoredManager.getItemById(epic.getId());
-
         assertEquals(epic.getEndTime(), restoredEpic.getEndTime(),
                 "Ошибка восстановления время завершения эпика");
     }

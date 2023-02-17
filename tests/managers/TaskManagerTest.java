@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -190,30 +191,41 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldNotCreateTaskOfNull() {
         Task task = null;
 
+        Executable executable = () -> taskManager.createItem(task);
+
         assertThrows(NullPointerException.class,
-                () -> taskManager.createItem(task),
+                executable,
                 "Задача создана из null");
     }
 
     //Получение списка задач
     @Test
     public void shouldReturnEmptyListIfTasksDoNotExist() {
+
+        Executable executable = () -> taskManager.getAllItemsByType(ItemType.TASK);
+
         assertThrows(NullPointerException.class,
-                () -> taskManager.getAllItemsByType(ItemType.TASK),
+                executable,
                 "Список не пустой");
     }
 
     @Test
     public void shouldReturnEmptyListIfSubtasksDoNotExist() {
+
+        Executable executable = () -> taskManager.getAllItemsByType(ItemType.SUBTASK);
+
         assertThrows(NullPointerException.class,
-                () -> taskManager.getAllItemsByType(ItemType.SUBTASK),
+                executable,
                 "Список не пустой");
     }
 
     @Test
     public void shouldReturnEmptyListIfEpicsDoNotExist() {
+
+        Executable executable = () -> taskManager.getAllItemsByType(ItemType.EPIC);
+
         assertThrows(NullPointerException.class,
-                () -> taskManager.getAllItemsByType(ItemType.EPIC),
+                executable,
                 "Список не пустой");
     }
 
@@ -298,15 +310,20 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(new Task("Первая задача"));
         Task task = null;
 
+        Executable executable = () -> taskManager.updateItem(task, 1);
+
         assertThrows(NullPointerException.class,
-                () -> taskManager.updateItem(task, 1),
+                executable,
                 "Обновлена пустая задача");
     }
 
     @Test
     public void shouldNotUpdateTaskWithNotExistingId() {
+
+        Executable executable = () -> taskManager.updateItem(new Task("Новая задача"), 1);
+
         assertThrows(NoSuchTaskExists.class,
-                () -> taskManager.updateItem(new Task("Новая задача"), 1),
+                executable,
                 "Обновлена задача с несуществующим Id");
     }
 
@@ -547,9 +564,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         //Подготовка данных
         taskManager.createItem(new Task("task"));
 
-        //Тестируемая логика с проверкой
+        //Тестируемая логика
+        Executable executable = () -> taskManager.removeItemById(2);
+
+        //Проверка
         assertThrows(NoSuchTaskExists.class,
-                () -> taskManager.removeItemById(2),
+                executable,
                 "Допуск удаления задачи с некорректным id");
     }
 
