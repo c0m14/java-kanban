@@ -39,7 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
         this.prioritizedItems = prioritizedItems;
     }
 
-    public HistoryManager getHistoryManager() {
+    protected HistoryManager getHistoryManager() {
         return historyManager;
     }
 
@@ -206,6 +206,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
     public Task getItemById(int id) {
         Task item = getItemByIdWithoutSavingHistory(id);
         historyManager.add(item);
@@ -222,7 +223,8 @@ public class InMemoryTaskManager implements TaskManager {
         return item;
     }
 
-    private ArrayList<Subtask> getEpicSubtasks(int epicId) {
+    @Override
+    public ArrayList<Subtask> getEpicSubtasks(int epicId) {
         ArrayList<Subtask> epicSubtasks = new ArrayList<>();
         for (Object item : allItems.get(ItemType.SUBTASK).values()) {
             Subtask subtask = (Subtask) item;
@@ -254,7 +256,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void updateEpicStartTimeDurationEndTime(int epicId) {
+    protected void updateEpicStartTimeDurationEndTime(int epicId) {
         Epic currEpic = (Epic) getItemByIdWithoutSavingHistory(epicId);
         if (!getEpicSubtasks(epicId).isEmpty()) {
             //Обновляем startTime
@@ -290,7 +292,8 @@ public class InMemoryTaskManager implements TaskManager {
         return tasks;
     }
 
-    public void addSubtask(Subtask subtask, Epic epic) {
+    @Override
+    public void linkSubtaskToEpic(Subtask subtask, Epic epic) {
         epic.addSubtask(subtask);
         subtask.setEpicId(epic.getId());
         updateEpicStatus(epic.getId());
