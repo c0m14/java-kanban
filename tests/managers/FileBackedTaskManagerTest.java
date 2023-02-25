@@ -129,7 +129,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         //Тестируемая логика
         taskManager.createItem(epic);
         taskManager.createItem(subtask1);
-        taskManager.addSubtask(subtask1, epic);
+        taskManager.linkSubtaskToEpic(subtask1, epic);
 
         //Проверка заполнения файла
         readAutosaveFile();
@@ -239,13 +239,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager.createItem(epic2);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        taskManager.addSubtask(subtask1, epic1);
+        taskManager.linkSubtaskToEpic(subtask1, epic1);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        taskManager.addSubtask(subtask2, epic1);
+        taskManager.linkSubtaskToEpic(subtask2, epic1);
         Subtask subtask3 = new Subtask("subtask3");
         taskManager.createItem(subtask3);
-        taskManager.addSubtask(subtask3, epic1);
+        taskManager.linkSubtaskToEpic(subtask3, epic1);
 
         //Тестируемая логика
         FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
@@ -270,13 +270,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager.createItem(epic2);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        taskManager.addSubtask(subtask1, epic1);
+        taskManager.linkSubtaskToEpic(subtask1, epic1);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        taskManager.addSubtask(subtask2, epic1);
+        taskManager.linkSubtaskToEpic(subtask2, epic1);
         Subtask subtask3 = new Subtask("subtask3");
         taskManager.createItem(subtask3);
-        taskManager.addSubtask(subtask3, epic1);
+        taskManager.linkSubtaskToEpic(subtask3, epic1);
 
         //Тестируемая логика
         FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
@@ -301,13 +301,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager.createItem(epic2);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        taskManager.addSubtask(subtask1, epic1);
+        taskManager.linkSubtaskToEpic(subtask1, epic1);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        taskManager.addSubtask(subtask2, epic1);
+        taskManager.linkSubtaskToEpic(subtask2, epic1);
         Subtask subtask3 = new Subtask("subtask3");
         taskManager.createItem(subtask3);
-        taskManager.addSubtask(subtask3, epic1);
+        taskManager.linkSubtaskToEpic(subtask3, epic1);
 
         //Тестируемая логика
         FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
@@ -391,8 +391,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         subtask2.setStartTime(LocalDateTime.parse("02-01-2023 11:10", formatter));
         subtask2.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         taskManager.createItem(subtask2);
-        taskManager.addSubtask(subtask1, epic);
-        taskManager.addSubtask(subtask2, epic);
+        taskManager.linkSubtaskToEpic(subtask1, epic);
+        taskManager.linkSubtaskToEpic(subtask2, epic);
         taskManager.updateEpicStartTimeDurationEndTime(epic.getId());
 
         //Тестируемая логика

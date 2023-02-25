@@ -337,7 +337,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
 
         //Тестируемая логика
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
 
         //Проверка статуса [1:'NEW']
         assertEquals(Status.NEW, epic.getStatus(), "Неверный статус эпика");
@@ -351,7 +351,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         subtask1.setStatus(Status.NEW);
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
 
         //Тестируемая логика
         subtask1.setStatus(Status.IN_PROGRESS);
@@ -370,13 +370,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         subtask2.setStatus(Status.NEW);
         taskManager.createItem(subtask2);
 
         //Тестируемая логика
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Проверка статуса [1: 'IN_PROGRESS', 2: 'NEW']
         assertEquals(Status.IN_PROGRESS, epic.getStatus(), "Неверный статус эпика");
@@ -390,11 +390,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         subtask2.setStatus(Status.NEW);
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Тестируемая логика
         subtask1.setStatus(Status.NEW);
@@ -412,11 +412,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         subtask2.setStatus(Status.NEW);
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Тестируемая логика
         subtask1.setStatus(Status.DONE);
@@ -434,11 +434,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         Epic epic = new Epic("epic");
         taskManager.createItem(epic);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         subtask2.setStatus(Status.DONE);
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Тестируемая логика
         subtask1.setStatus(Status.DONE);
@@ -456,11 +456,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask1 = new Subtask("subtask1");
         subtask1.setStatus(Status.NEW);
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         subtask2.setStatus(Status.DONE);
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Тестируемая логика
         taskManager.removeItemById(subtask2.getId());
@@ -477,11 +477,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask1 = new Subtask("subtask1");
         subtask1.setStatus(Status.DONE);
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         subtask2.setStatus(Status.DONE);
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Тестируемая логика
         taskManager.removeAllItemsByType(ItemType.SUBTASK);
@@ -512,7 +512,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         Epic epicWithSubtasks = new Epic("epicWithSubtasks");
         taskManager.createItem(epicWithSubtasks);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epicWithSubtasks);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epicWithSubtasks);
 
         //Тестируемая логика
         taskManager.removeItemById(subtask1.getId());
@@ -545,8 +545,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask2);
         Epic epicWithSubtasks = new Epic("epicWithSubtasks");
         taskManager.createItem(epicWithSubtasks);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epicWithSubtasks);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epicWithSubtasks);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epicWithSubtasks);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epicWithSubtasks);
 
         //Тестируемая логика
         taskManager.removeItemById(epicWithSubtasks.getId());
@@ -625,7 +625,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epicWithSubtasks);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epicWithSubtasks);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epicWithSubtasks);
 
         //Тестируемая логика
         taskManager.removeAllItemsByType(ItemType.EPIC);
@@ -648,17 +648,17 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         Subtask subtask3 = new Subtask("subtask3");
         subtask3.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
         subtask3.setEpicId(epic.getId());
 
         //Тестируемая логика
         taskManager.createItem(subtask3);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask3, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask3, epic);
 
         //Проверка расчета времени
         assertEquals(LocalDateTime.of(2023, 1, 2, 12, 0),
@@ -673,10 +673,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         Subtask subtask3 = new Subtask("subtask3");
         subtask3.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
         subtask3.setEpicId(epic.getId());
@@ -700,14 +700,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         Subtask subtask3 = new Subtask("subtask3");
         subtask3.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
         taskManager.createItem(subtask3);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask3, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask3, epic);
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
         taskManager.updateItem(subtask1, subtask1.getId());
@@ -729,10 +729,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Проверка на null
         Assertions.assertNull(epic.getStartTime(),
@@ -747,17 +747,17 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         Subtask subtask3 = new Subtask("subtask3");
         subtask3.setDurationMinutes(Duration.of(10, ChronoUnit.MINUTES));
         subtask3.setEpicId(epic.getId());
 
         //Тестируемая логика
         taskManager.createItem(subtask3);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask3, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask3, epic);
 
         //Проверка расчета продолжительности
         Assertions.assertEquals(Duration.of(10, ChronoUnit.MINUTES),
@@ -772,10 +772,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
@@ -796,10 +796,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
 
@@ -819,10 +819,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         ((InMemoryTaskManager) taskManager).updateEpicStartTimeDurationEndTime(epic.getId());
 
         //Проверка расчета продолжительности
@@ -841,7 +841,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         subtask1.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
         subtask1.setDurationMinutes(Duration.of(10, ChronoUnit.MINUTES));
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask4");
         subtask2.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
@@ -849,7 +849,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         //Тестируемая логика
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Проверка корректности расчета времени окончания
         Assertions.assertEquals(LocalDateTime.parse("02-01-2023 12:10", formatter),
@@ -866,7 +866,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         subtask1.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
         subtask1.setDurationMinutes(Duration.of(10, ChronoUnit.MINUTES));
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask4");
         subtask2.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
@@ -893,7 +893,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(subtask1);
         subtask1.setStartTime(LocalDateTime.parse("02-01-2023 12:00", formatter));
         subtask1.setDurationMinutes(Duration.of(10, ChronoUnit.MINUTES));
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask4");
         subtask2.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask2.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
@@ -916,15 +916,15 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
 
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         Subtask subtask3WithOutStartDate = new Subtask("subtask3WithOutStartDate");
         taskManager.createItem(subtask3WithOutStartDate);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask3WithOutStartDate, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask3WithOutStartDate, epic);
 
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
@@ -946,13 +946,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         Subtask subtask3WithOutDuration = new Subtask("subtask3WithOutStartDate");
         taskManager.createItem(subtask3WithOutDuration);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask3WithOutDuration, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask3WithOutDuration, epic);
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         taskManager.updateItem(subtask1, subtask1.getId());
@@ -984,10 +984,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask1 = new Subtask("subtask1");
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Проверка сортировки
         assertEquals(subtask1, taskManager.getPrioritizedTasks().get(0), "Ошибка сортировки задач");
@@ -1001,11 +1001,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         subtask2.setStartTime(LocalDateTime.parse("03-02-2023 16:20", formatter));
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
 
         //Проверка сортировки
         assertEquals(subtask2, taskManager.getPrioritizedTasks().get(0), "Ошибка сортировки задач");
@@ -1020,7 +1020,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask1 = new Subtask("subtask1");
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 12:00", formatter));
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Task task = new Task("task");
         task.setStartTime(LocalDateTime.parse("05-02-2023 12:20", formatter));
         taskManager.createItem(task);
@@ -1097,10 +1097,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:30", formatter));
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         taskManager.updateItem(subtask1, subtask1.getId());
@@ -1120,10 +1120,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:20", formatter));
         subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
         taskManager.updateItem(subtask1, subtask1.getId());
@@ -1143,10 +1143,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createItem(epic);
         Subtask subtask1 = new Subtask("subtask1");
         taskManager.createItem(subtask1);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask1, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask1, epic);
         Subtask subtask2 = new Subtask("subtask2");
         taskManager.createItem(subtask2);
-        ((InMemoryTaskManager) taskManager).addSubtask(subtask2, epic);
+        ((InMemoryTaskManager) taskManager).linkSubtaskToEpic(subtask2, epic);
         subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:50", formatter));
         subtask1.setDurationMinutes(Duration.of(120, ChronoUnit.MINUTES));
         taskManager.updateItem(subtask1, subtask1.getId());
