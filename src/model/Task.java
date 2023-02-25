@@ -3,6 +3,7 @@ package model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Task {
@@ -167,7 +168,7 @@ public class Task {
         return sb.toString();
     }
 
-/*    @Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -182,5 +183,5 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }*/
+    }
 }
