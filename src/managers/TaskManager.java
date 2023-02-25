@@ -1,6 +1,8 @@
 package managers;
 
+import model.Epic;
 import model.ItemType;
+import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
@@ -22,4 +24,8 @@ public interface TaskManager {
     Task getItemById(int id);
 
     ArrayList<Task> getPrioritizedTasks();
+
+    void linkSubtaskToEpic(Subtask subtask, Epic epic);
+
+    ArrayList<Subtask> getEpicSubtasks(int epicId);
 }
