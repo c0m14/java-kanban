@@ -282,7 +282,8 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    protected ArrayList<Task> getAllItemsOfAllTypes() {
+    @Override
+    public ArrayList<Task> getAllItemsOfAllTypes() {
         ArrayList<Task> tasks = new ArrayList<>();
         for (HashMap<Integer, Task> entrySet : allItems.values()) {
             for (Task task : entrySet.values()) {

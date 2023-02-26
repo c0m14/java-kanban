@@ -28,4 +28,6 @@ public interface TaskManager {
     void linkSubtaskToEpic(Subtask subtask, Epic epic);
 
     ArrayList<Subtask> getEpicSubtasks(int epicId);
+
+    ArrayList<Task> getAllItemsOfAllTypes();
 }
