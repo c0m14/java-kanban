@@ -28,6 +28,4 @@ public interface TaskManager {
     void linkSubtaskToEpic(Subtask subtask, Epic epic);
 
     ArrayList<Subtask> getEpicSubtasks(int epicId);
-
-    void removeAllItemsByType(ItemType itemType);
 }
