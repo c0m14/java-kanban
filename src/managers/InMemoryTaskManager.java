@@ -39,7 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
         this.prioritizedItems = prioritizedItems;
     }
 
-    protected HistoryManager getHistoryManager() {
+    public HistoryManager getHistoryManager() {
         return historyManager;
     }
 
@@ -175,6 +175,7 @@ public class InMemoryTaskManager implements TaskManager {
         prioritizedItems.remove(currItem);
     }
 
+    @Override
     public void removeAllItemsByType(ItemType itemType) {
         int[] ids = allItems.get(itemType).keySet().stream().mapToInt(key -> key).toArray();
         for (int id : ids) {
@@ -213,7 +214,7 @@ public class InMemoryTaskManager implements TaskManager {
         return item;
     }
 
-    protected Task getItemByIdWithoutSavingHistory(int id) {
+    public Task getItemByIdWithoutSavingHistory(int id) {
         Task item = null;
         for (HashMap<Integer, Task> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {
@@ -282,8 +283,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
-    public ArrayList<Task> getAllItemsOfAllTypes() {
+    protected ArrayList<Task> getAllItemsOfAllTypes() {
         ArrayList<Task> tasks = new ArrayList<>();
         for (HashMap<Integer, Task> entrySet : allItems.values()) {
             for (Task task : entrySet.values()) {

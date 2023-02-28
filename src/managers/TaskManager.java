@@ -29,5 +29,5 @@ public interface TaskManager {
 
     ArrayList<Subtask> getEpicSubtasks(int epicId);
 
-    ArrayList<Task> getAllItemsOfAllTypes();
+    void removeAllItemsByType(ItemType itemType);
 }
