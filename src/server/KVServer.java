@@ -105,8 +105,8 @@ public class KVServer {
 	}
 
 	public void start() {
-		System.out.println("Запускаем сервер на порту " + PORT);
-		System.out.println("Открой в браузере http://localhost:" + PORT + "/");
+		System.out.printf("Запускаем сервер на порту %s\n", PORT);
+		System.out.printf("Откройте в браузере http://localhost:%s/\n", PORT);
 		System.out.println("API_TOKEN: " + apiToken);
 		server.start();
 	}
