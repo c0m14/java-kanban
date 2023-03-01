@@ -22,7 +22,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.backupFilePath = backupFilePath;
     }
 
-    public FileBackedTaskManager(int idCounter,
+    private FileBackedTaskManager(int idCounter,
                                  HashMap<ItemType, HashMap<Integer, Task>> allItems,
                                  HistoryManager historyManager,
                                  TreeSet<Task> prioritizedItems,
@@ -36,6 +36,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         backupFilePath = Path.of("project_files/autosave.txt");
     }
 
+    protected FileBackedTaskManager(int idCounter,
+                                    HashMap<ItemType, HashMap<Integer, Task>> allItems,
+                                    HistoryManager historyManager,
+                                    TreeSet<Task> prioritizedItems) {
+        super(idCounter, allItems, historyManager, prioritizedItems);
+        backupFilePath = Path.of("project_files/autosave.txt");
+    }
+
     public static FileBackedTaskManager loadFromFile(Path file) {
         List<Task> tasksFromFile = new ArrayList<>(); //временное хранилище всех items из файла
         int restoredIdCounter = -1;
@@ -43,8 +51,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
         HashMap<Integer, Task> items;
         TreeSet<Task> restoredPrioritizedItems = new TreeSet<>((task1, task2) -> {
-            if (task1.getStartTime() == null || task2.getStartTime() == null) {
+            if (task1.getStartTime() == null) {
                 return 1;
+            } else if (task2.getStartTime() == null) {
+                return -1;
             } else {
                 return task1.getStartTime().compareTo(task2.getStartTime());
             }
