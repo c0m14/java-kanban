@@ -1,5 +1,7 @@
 package api;
 
+import adapters.DurationAdapter;
+import adapters.LocalDateTimeAdapter;
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -14,6 +16,7 @@ import model.Task;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +36,7 @@ public class HttpTaskServer {
         httpServer.createContext("/api/v1/tasks/", this::handleTasks);
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
     }
 
@@ -73,11 +77,12 @@ public class HttpTaskServer {
                         if (Pattern.matches("^id=\\d+$", query)) {
                             //Получение item по id
                             String queryItemId = query.replaceFirst("id=", "");
-                            Task task = taskManager.getItemById(getIdFromPath(queryItemId));
-                            if (task != null) {
+                            Task task;
+                            try {
+                                task = taskManager.getItemById(getIdFromPath(queryItemId));
                                 String response = gson.toJson(task);
                                 writeResponse(httpExchange, response, 200);
-                            } else {
+                            } catch (NoSuchTaskExists e) {
                                 writeResponse(httpExchange,
                                         "Задача с id " + queryItemId + " не найдена",
                                         204);
@@ -165,7 +170,6 @@ public class HttpTaskServer {
                                                             400);
                                             }
                                             writeResponse(httpExchange, "", 201);
-                                            return;
                                         } else {
                                             if (((InMemoryTaskManager) taskManager)
                                                     .getItemByIdWithoutSavingHistory(itemId) != null) {
@@ -188,14 +192,13 @@ public class HttpTaskServer {
                                                                 400);
                                                 }
                                                 writeResponse(httpExchange, "", 201);
-                                                return;
                                             } else {
                                                 writeResponse(httpExchange,
                                                         "Ошибка обновления. Нет задач с id: " + itemId,
                                                         400);
-                                                return;
                                             }
                                         }
+                                        return;
                                     } catch (NumberFormatException e) {
                                         writeResponse(httpExchange,
                                                 "В параметре id передано не число",

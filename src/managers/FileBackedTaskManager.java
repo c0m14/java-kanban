@@ -20,7 +20,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager(Path backupFilePath) {
         super();
         this.backupFilePath = backupFilePath;
-
     }
 
     public FileBackedTaskManager(int idCounter,
@@ -30,6 +29,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                                  Path backupFilePath) {
         super(idCounter, allItems, historyManager, prioritizedItems);
         this.backupFilePath = backupFilePath;
+    }
+
+    protected FileBackedTaskManager() {
+        super();
+        backupFilePath = Path.of("project_files/autosave.txt");
     }
 
     public static FileBackedTaskManager loadFromFile(Path file) {
