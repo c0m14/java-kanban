@@ -8,11 +8,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import server.KVServer;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public abstract class TaskManagerTest<T extends TaskManager> {
     protected static DateTimeFormatter formatter;
     protected T taskManager;
+    //protected KVServer kvServer;
 
     @BeforeAll
     public static void beforeAll() {
@@ -32,6 +36,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @BeforeEach
     public void beforeEach() {
+/*        try {
+            kvServer = new KVServer();
+        } catch (IOException e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+        }
+        kvServer.start();*/
         setTaskManager();
         ((InMemoryTaskManager) taskManager).setIdCounter(1);
     }
@@ -92,7 +102,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, createdSubtasks.size(), "Неверное количество элементов в списке подзадач");
         assertTrue(createdSubtasks.contains(testSubtask1), "Подзадача не найдена");
         //Проверяем, что создана нужная задача
-        Subtask savedSubtask = (Subtask) taskManager.getItemById(testSubtask1.getId());
+        Subtask savedSubtask = (Subtask) ((InMemoryTaskManager)taskManager)
+                .getItemByIdWithoutSavingHistory(testSubtask1.getId());
         assertNotNull(savedSubtask, "Подзадача не найдена");
         assertEquals(testSubtask1, savedSubtask, "Подзадачи не совпадают");
     }
@@ -114,7 +125,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(createdSubtasks.contains(testSubtask2), "Подзадача не найдена");
         assertTrue(createdSubtasks.contains(testSubtask1), "Подзадача не найдена");
         //Проверяем, что создана нужная задача
-        Subtask savedSubtask = (Subtask) taskManager.getItemById(testSubtask2.getId());
+        Subtask savedSubtask = (Subtask) ((InMemoryTaskManager)taskManager)
+                .getItemByIdWithoutSavingHistory(testSubtask2.getId());
         assertNotNull(savedSubtask, "Подзадача не найдена");
         assertEquals(testSubtask2, savedSubtask, "Подзадачи не совпадают");
     }
@@ -133,7 +145,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, createdEpics.size(), "Неверное количество элементов в списке эпиков");
         assertTrue(createdEpics.contains(testEpic1), "Эпик не найден");
         //Проверяем, что создана нужная задача
-        Epic savedEpic = (Epic) taskManager.getItemById(testEpic1.getId());
+        Epic savedEpic = (Epic) ((InMemoryTaskManager)taskManager).getItemByIdWithoutSavingHistory(testEpic1.getId());
         assertNotNull(savedEpic, "Эпик не найден");
         assertEquals(testEpic1, savedEpic, "Эпики не совпадают");
     }
@@ -156,7 +168,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(createdEpics.contains(testEpic1), "Эпик не найден");
 
         //Проверяем, что создана нужная задача
-        Epic savedEpic = (Epic) taskManager.getItemById(testEpic2.getId());
+        Epic savedEpic = (Epic) ((InMemoryTaskManager)taskManager).getItemByIdWithoutSavingHistory(testEpic2.getId());
         assertNotNull(savedEpic, "Эпик не найден");
         assertEquals(testEpic2, savedEpic, "Эпики не совпадают");
     }
@@ -268,7 +280,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.updateItem(epic1, epic1.getId());
 
         //Проверка корректности обновления задачи
-        Task updatedEpic = taskManager.getItemById(epic1.getId());
+        Task updatedEpic = ((InMemoryTaskManager)taskManager).getItemByIdWithoutSavingHistory(epic1.getId());
         assertNotNull(updatedEpic, "Обновленный эпик не существует");
         assertEquals(updatedEpic, epic1, "Эпики не совпадают");
         assertEquals("Новое имя эпика", updatedEpic.getName(), "Эпик не изменен");
@@ -293,7 +305,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.updateItem(subtask1, subtask1.getId());
 
         //Проверка корректности обновления задачи
-        Task updatedSubtask = taskManager.getItemById(subtask1.getId());
+        Task updatedSubtask = ((InMemoryTaskManager) taskManager).getItemByIdWithoutSavingHistory(subtask1.getId());
         assertNotNull(updatedSubtask, "Обновленная подзадача не существует");
         assertEquals(updatedSubtask, subtask1, "Подзадачи не совпадают");
         assertEquals("Новое имя подзадачи", updatedSubtask.getName(), "Подзадача не изменена");
