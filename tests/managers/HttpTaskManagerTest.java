@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -263,7 +265,10 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
 
     //тесты на сохранение истории на сервере
     @Test
-    public void shouldSaveHistoryToServer() throws IOException, InterruptedException{
+    public void shouldSaveHistoryToServer() throws IOException, InterruptedException {
+        Type taskType = new TypeToken<Task>() {}.getType();
+        Type subtaskType = new TypeToken<Subtask>() {}.getType();
+        Type epicType = new TypeToken<Epic>() {}.getType();
         Task task = new Task("task");
         taskManager.createItem(task);
         Epic epic = new Epic("epic");
@@ -276,12 +281,6 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
         taskManager.getItemById(task.getId());
         taskManager.getItemById(epic.getId());
 
-        Type taskType = new TypeToken<Task>() {
-        }.getType();
-        Type subtaskType = new TypeToken<Subtask>() {
-        }.getType();
-        Type epicType = new TypeToken<Epic>() {
-        }.getType();
         JsonElement jsonElement = JsonParser.parseString(taskManager.getKvTaskClient().load(KVTaskClient.Key.HISTORY));
         JsonArray jsonArray = jsonElement.getAsJsonArray();
         ArrayList<Task> requestedItems = new ArrayList<>();
@@ -300,6 +299,195 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
         assertEquals(subtask, requestedItems.get(0), "Некорректная очередность задач в списке");
         assertEquals(task, requestedItems.get(1), "Некорректная очередность задач в списке");
         assertEquals(epic, requestedItems.get(2), "Некорректная очередность задач в списке");
+    }
+
+    //Тесты на восстановление данных с сервера
+    @Test
+    public void shouldLoadAllItemsFromServer() throws IOException, InterruptedException {
+        Task task = new Task("task");
+        taskManager.createItem(task);
+        Epic epic1 = new Epic("epic1");
+        taskManager.createItem(epic1);
+        Epic epic2 = new Epic("epic2");
+        taskManager.createItem(epic2);
+        Subtask subtask1 = new Subtask("subtask1");
+        taskManager.createItem(subtask1);
+        taskManager.linkSubtaskToEpic(subtask1, epic1);
+        Subtask subtask2 = new Subtask("subtask2");
+        taskManager.createItem(subtask2);
+        taskManager.linkSubtaskToEpic(subtask2, epic1);
+        Subtask subtask3 = new Subtask("subtask3");
+        taskManager.createItem(subtask3);
+        taskManager.linkSubtaskToEpic(subtask3, epic1);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        assertEquals(1, loadedTaskManager.getAllItemsByType(ItemType.TASK).size(),
+                "Не все задачи восстановлены");
+        assertEquals(2, loadedTaskManager.getAllItemsByType(ItemType.EPIC).size(),
+                "Не все задачи восстановлены");
+        assertEquals(3, loadedTaskManager.getAllItemsByType(ItemType.SUBTASK).size(),
+                "Не все задачи восстановлены");
+    }
+
+    @Test
+    public void shouldLoadIfTasksListIsEmpty() throws IOException, InterruptedException{
+        Epic epic1 = new Epic("epic1");
+        taskManager.createItem(epic1);
+        Epic epic2 = new Epic("epic2");
+        taskManager.createItem(epic2);
+        Subtask subtask1 = new Subtask("subtask1");
+        taskManager.createItem(subtask1);
+        taskManager.linkSubtaskToEpic(subtask1, epic1);
+        Subtask subtask2 = new Subtask("subtask2");
+        taskManager.createItem(subtask2);
+        taskManager.linkSubtaskToEpic(subtask2, epic1);
+        Subtask subtask3 = new Subtask("subtask3");
+        taskManager.createItem(subtask3);
+        taskManager.linkSubtaskToEpic(subtask3, epic1);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        assertEquals(2, loadedTaskManager.getAllItemsByType(ItemType.EPIC).size(),
+                "Не все задачи восстановлены");
+        assertEquals(3, loadedTaskManager.getAllItemsByType(ItemType.SUBTASK).size(),
+                "Не все задачи восстановлены");
+    }
+
+    @Test
+    public void shouldLoadIfSubtasksListIsEmpty() throws IOException, InterruptedException {
+        Task task = new Task("task");
+        taskManager.createItem(task);
+        Epic epic1 = new Epic("epic1");
+        taskManager.createItem(epic1);
+        Epic epic2 = new Epic("epic2");
+        taskManager.createItem(epic2);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        assertEquals(1, loadedTaskManager.getAllItemsByType(ItemType.TASK).size(),
+                "Не все задачи восстановлены");
+        assertEquals(2, loadedTaskManager.getAllItemsByType(ItemType.EPIC).size(),
+                "Не все задачи восстановлены");
+    }
+
+    @Test
+    public void shouldLoadIfEpicsListIsEmpty() throws IOException, InterruptedException {
+        Task task = new Task("task");
+        taskManager.createItem(task);
+        Subtask subtask1 = new Subtask("subtask1");
+        taskManager.createItem(subtask1);
+        Subtask subtask2 = new Subtask("subtask2");
+        taskManager.createItem(subtask2);
+        Subtask subtask3 = new Subtask("subtask3");
+        taskManager.createItem(subtask3);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        assertEquals(1, loadedTaskManager.getAllItemsByType(ItemType.TASK).size(),
+                "Не все задачи восстановлены");
+        assertEquals(3, loadedTaskManager.getAllItemsByType(ItemType.SUBTASK).size(),
+                "Не все задачи восстановлены");
+    }
+
+    @Test
+    public void shouldRestoreIdCounter() throws IOException, InterruptedException {
+        Task task1 = new Task("task1");
+        taskManager.createItem(task1);
+        Task task2 = new Task("task2");
+        taskManager.createItem(task2);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        assertEquals(2, loadedTaskManager.getIdCounter());
+    }
+
+    @Test
+    public void shouldRestoreInfoAboutEpicForSubtasks() throws IOException, InterruptedException {
+        Epic epic = new Epic("epic");
+        taskManager.createItem(epic);
+        Subtask subtask1 = new Subtask("subtask1");
+        taskManager.createItem(subtask1);
+        taskManager.linkSubtaskToEpic(subtask1, epic);
+        Subtask subtask2 = new Subtask("subtask2");
+        taskManager.createItem(subtask2);
+        taskManager.linkSubtaskToEpic(subtask2, epic);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        Subtask loadedSubtask1 = (Subtask) loadedTaskManager.getItemById(subtask1.getId());
+        Subtask loadedSubtask2 = (Subtask) loadedTaskManager.getItemById(subtask2.getId());
+        assertEquals(epic.getId(), loadedSubtask1.getEpicId());
+        assertEquals(epic.getId(), loadedSubtask2.getEpicId());
+    }
+
+    @Test
+    public void shouldRestoreInfoAboutSubtasksForEpic() throws IOException, InterruptedException {
+        Epic epic = new Epic("epic");
+        taskManager.createItem(epic);
+        Subtask subtask1 = new Subtask("subtask1");
+        taskManager.createItem(subtask1);
+        taskManager.linkSubtaskToEpic(subtask1, epic);
+        Subtask subtask2 = new Subtask("subtask2");
+        taskManager.createItem(subtask2);
+        taskManager.linkSubtaskToEpic(subtask2, epic);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        Epic loadedEpic = (Epic) loadedTaskManager.getItemById(epic.getId());
+        assertTrue(loadedEpic.getEpicSubtaskIds().contains(subtask1.getId()));
+        assertTrue(loadedEpic.getEpicSubtaskIds().contains(subtask2.getId()));
+        assertEquals(2, epic.getEpicSubtaskIds().size());
+    }
+
+    @Test
+    public void shouldRestoreHistoryFromServer() throws IOException, InterruptedException {
+        Task task = new Task("task");
+        taskManager.createItem(task);
+        Epic epic = new Epic("epic");
+        taskManager.createItem(epic);
+        Subtask subtask = new Subtask("subtask");
+        taskManager.createItem(subtask);
+        taskManager.linkSubtaskToEpic(subtask, epic);
+        taskManager.getItemById(epic.getId());
+        taskManager.getItemById(subtask.getId());
+        taskManager.getItemById(task.getId());
+
+        InMemoryTaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        List<Task> loadedHistory = loadedTaskManager.getHistoryManager().getHistory();
+        assertEquals(3, loadedHistory.size());
+        assertEquals(loadedHistory.get(0), epic);
+        assertEquals(loadedHistory.get(1), subtask);
+        assertEquals(loadedHistory.get(2), task);
+    }
+
+    @Test
+    public void shouldRestorePrioritizedListFromServer() throws IOException, InterruptedException {
+        Epic epic = new Epic("epic");
+        taskManager.createItem(epic);
+        Subtask subtask1 = new Subtask("subtask1");
+        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:20", formatter));
+        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        taskManager.createItem(subtask1);
+        Subtask subtask2 = new Subtask("subtask2");
+        subtask2.setStartTime(LocalDateTime.parse("02-01-2023 11:10", formatter));
+        subtask2.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
+        taskManager.createItem(subtask2);
+        taskManager.linkSubtaskToEpic(subtask1, epic);
+        taskManager.linkSubtaskToEpic(subtask2, epic);
+        taskManager.updateEpicStartTimeDurationEndTime(epic.getId());
+        Task task = new Task("task");
+        taskManager.createItem(task);
+
+        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
+
+        ArrayList<Task> loadedPrioritizedTasks = loadedTaskManager.getPrioritizedTasks();
+
+        assertEquals(3, loadedPrioritizedTasks.size());
+        assertEquals(loadedPrioritizedTasks.get(0), subtask1);
+        assertEquals(loadedPrioritizedTasks.get(1), subtask2);
+        assertEquals(loadedPrioritizedTasks.get(2), task);
     }
 
 }
