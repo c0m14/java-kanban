@@ -1,7 +1,10 @@
 package api;
 
+import adapters.DurationAdapter;
+import adapters.LocalDateTimeAdapter;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import exceptions.NoSuchTaskExists;
 import managers.Managers;
 import managers.TaskManager;
 import model.Epic;
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -40,6 +44,7 @@ public class HttpTaskServerTest {
         client = HttpClient.newHttpClient();
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
         formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     }
@@ -84,7 +89,7 @@ public class HttpTaskServerTest {
     }
 
     @Test
-    public void shouldReturn204ResponseCodeIfListofTasksIsEmpty() throws IOException, InterruptedException {
+    public void shouldReturn204ResponseCodeIfListOfTasksIsEmpty() throws IOException, InterruptedException {
         URI url = URI.create("http://localhost:8080/api/v1/tasks/task/");
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
@@ -854,7 +859,10 @@ public class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа");
-        assertNull(taskManager.getItemById(task.getId()));
+        Executable executable = () -> taskManager.getItemById(task.getId());
+        assertThrows(NoSuchTaskExists.class,
+                executable,
+                "Задача не удалена");
     }
 
     @Test
@@ -885,7 +893,10 @@ public class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа");
-        assertNull(taskManager.getItemById(subtask.getId()));
+        Executable executable = () -> taskManager.getItemById(subtask.getId());
+        assertThrows(NoSuchTaskExists.class,
+                executable,
+                "Задача не удалена");
     }
 
     @Test
@@ -902,7 +913,10 @@ public class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа");
-        assertNull(taskManager.getItemById(epic.getId()));
+        Executable executable = () -> taskManager.getItemById(epic.getId());
+        assertThrows(NoSuchTaskExists.class,
+                executable,
+                "Задача не удалена");
     }
 
     //тесты на контракт PATCH /api/v1/tasks/subtask/?subtaskId={id}&epicId={id}
@@ -1011,7 +1025,7 @@ public class HttpTaskServerTest {
 
     //тест на некорректный метод
     @Test
-    public void shouldReturn400IfMetodIsIncorrect() throws InterruptedException, IOException {
+    public void shouldReturn400IfMethodIsIncorrect() throws InterruptedException, IOException {
         URI url = URI.create("http://localhost:8080/api/v1/tasks/"); //неверный id эпика
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)

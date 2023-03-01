@@ -208,13 +208,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getItemById(int id) {
+    public Task getItemById(int id) throws NoSuchTaskExists {
+        if (getItemByIdWithoutSavingHistory(id) == null) {
+            throw new NoSuchTaskExists("Нет задачи с таким id");
+        }
         Task item = getItemByIdWithoutSavingHistory(id);
         historyManager.add(item);
         return item;
     }
 
-    public Task getItemByIdWithoutSavingHistory(int id) {
+    public Task getItemByIdWithoutSavingHistory(int id) throws NoSuchTaskExists {
         Task item = null;
         for (HashMap<Integer, Task> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {

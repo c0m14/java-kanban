@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public abstract class TaskManagerTest<T extends TaskManager> {
     protected static DateTimeFormatter formatter;
     protected T taskManager;
-    //protected KVServer kvServer;
 
     @BeforeAll
     public static void beforeAll() {
@@ -33,12 +32,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @BeforeEach
     public void beforeEach() {
-/*        try {
-            kvServer = new KVServer();
-        } catch (IOException e) {
-            System.out.println(Arrays.toString(e.getStackTrace()));
-        }
-        kvServer.start();*/
         setTaskManager();
         ((InMemoryTaskManager) taskManager).setIdCounter(1);
     }
