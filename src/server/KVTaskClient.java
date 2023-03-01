@@ -10,16 +10,27 @@ import java.net.http.HttpResponse;
 
 public class KVTaskClient {
 
-    private final String API_TOKEN;
-    private  HttpClient client;
-    private String host;
-    private String saveUrl = "/save/";
-    private String loadUrl = "/load/";
-    private String registerUrl = "/register";
+    private String API_TOKEN;
+    private final HttpClient client;
+    private final String host;
+    private final String saveUrl = "/save/";
+    private final String loadUrl = "/load/";
+    private final String registerUrl = "/register";
 
     public KVTaskClient(String host) throws InterruptedException, IOException {
         client = HttpClient.newHttpClient();
         this.host = host;
+ /*       URI url = URI.create(host + registerUrl);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .GET()
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        this.API_TOKEN = response.body();*/
+        registerOnServer();
+    }
+
+    public void registerOnServer() throws IOException, InterruptedException {
         URI url = URI.create(host + registerUrl);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
@@ -37,9 +48,13 @@ public class KVTaskClient {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         System.out.println(response.statusCode());
+        if (response.statusCode() == 403) {
+            registerOnServer();
+            put(key, json);
+        }
     }
 
-    public String load (Key key) throws IOException, InterruptedException, IncorrectLoadFromServerRequestException {
+    public String load(Key key) throws IOException, InterruptedException, IncorrectLoadFromServerRequestException {
         URI url = URI.create(host + loadUrl + key + "?API_TOKEN=" + API_TOKEN);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
@@ -48,6 +63,9 @@ public class KVTaskClient {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 400) {
             throw new IncorrectLoadFromServerRequestException("Ключ не был ранее использован для сохранения");
+        } else if (response.statusCode() == 403) {
+            registerOnServer();
+            load(key);
         }
         return response.body();
     }
