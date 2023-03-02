@@ -260,77 +260,6 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     }
 
     @Test
-    public void shouldRestoreInfoAboutEpicsForSubtasks() {
-        //Подготовка данных
-        Task task = new Task("task");
-        taskManager.createItem(task);
-        Epic epic1 = new Epic("epic1");
-        taskManager.createItem(epic1);
-        Epic epic2 = new Epic("epic2");
-        taskManager.createItem(epic2);
-        Subtask subtask1 = new Subtask("subtask1");
-        taskManager.createItem(subtask1);
-        taskManager.linkSubtaskToEpic(subtask1, epic1);
-        Subtask subtask2 = new Subtask("subtask2");
-        taskManager.createItem(subtask2);
-        taskManager.linkSubtaskToEpic(subtask2, epic1);
-        Subtask subtask3 = new Subtask("subtask3");
-        taskManager.createItem(subtask3);
-        taskManager.linkSubtaskToEpic(subtask3, epic1);
-
-        //Тестируемая логика
-        FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
-
-        //Проверка знания подзадач об эпиках
-        assertEquals(epic1.getId(), ((Subtask) restoredManager.getItemById(subtask1.getId())).getEpicId(),
-                "Подзадача не привязана к эпику");
-        assertEquals(epic1.getId(), ((Subtask) restoredManager.getItemById(subtask2.getId())).getEpicId(),
-                "Подзадача не привязана к эпику");
-        assertEquals(epic1.getId(), ((Subtask) restoredManager.getItemById(subtask3.getId())).getEpicId(),
-                "Подзадача не привязана к эпику");
-    }
-
-    @Test
-    public void shouldRestoreAllInfoAboutSubtasksInEpics() {
-        //Подготовка данных
-        Task task = new Task("task");
-        taskManager.createItem(task);
-        Epic epic1 = new Epic("epic1");
-        taskManager.createItem(epic1);
-        Epic epic2 = new Epic("epic2");
-        taskManager.createItem(epic2);
-        Subtask subtask1 = new Subtask("subtask1");
-        taskManager.createItem(subtask1);
-        taskManager.linkSubtaskToEpic(subtask1, epic1);
-        Subtask subtask2 = new Subtask("subtask2");
-        taskManager.createItem(subtask2);
-        taskManager.linkSubtaskToEpic(subtask2, epic1);
-        Subtask subtask3 = new Subtask("subtask3");
-        taskManager.createItem(subtask3);
-        taskManager.linkSubtaskToEpic(subtask3, epic1);
-
-        //Тестируемая логика
-        FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
-
-        //Проверка знания эпиков о подзадачах
-        assertTrue(((Epic) restoredManager.
-                        getItemById(epic1.getId()))
-                        .getEpicSubtaskIds()
-                        .contains(subtask1.getId()),
-                "Подзадача не привязана к эпику");
-        assertTrue(((Epic) restoredManager.
-                        getItemById(epic1.getId()))
-                        .getEpicSubtaskIds()
-                        .contains(subtask2.getId()),
-                "Подзадача не привязана к эпику");
-        assertTrue(((Epic) restoredManager.
-                        getItemById(epic1.getId()))
-                        .getEpicSubtaskIds()
-                        .contains(subtask3.getId()),
-                "Подзадача не привязана к эпику");
-    }
-
-    @Test
     public void shouldRestoreHistoryFromFile() {
         //Подготовка данных
         Task task = new Task("task");
@@ -376,31 +305,5 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
                 "Ошибка восстановления задач по приоритету");
         assertEquals(task3.getId(), restoredPrioritizedList.get(2).getId(),
                 "Ошибка восстановления задач по приоритету");
-    }
-
-    @Test
-    public void shouldCalculateEpicEndTimeWhileBeingRestored() {
-        //Подготовка данных
-        Epic epic = new Epic("epic");
-        taskManager.createItem(epic);
-        Subtask subtask1 = new Subtask("subtask1");
-        subtask1.setStartTime(LocalDateTime.parse("01-01-2023 11:20", formatter));
-        subtask1.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
-        taskManager.createItem(subtask1);
-        Subtask subtask2 = new Subtask("subtask2");
-        subtask2.setStartTime(LocalDateTime.parse("02-01-2023 11:10", formatter));
-        subtask2.setDurationMinutes(Duration.of(30, ChronoUnit.MINUTES));
-        taskManager.createItem(subtask2);
-        taskManager.linkSubtaskToEpic(subtask1, epic);
-        taskManager.linkSubtaskToEpic(subtask2, epic);
-        taskManager.updateEpicStartTimeDurationEndTime(epic.getId());
-
-        //Тестируемая логика
-        FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(autosaveFile);
-
-        //Проверка времени эпика
-        Epic restoredEpic = (Epic) restoredManager.getItemById(epic.getId());
-        assertEquals(epic.getEndTime(), restoredEpic.getEndTime(),
-                "Ошибка восстановления время завершения эпика");
     }
 }

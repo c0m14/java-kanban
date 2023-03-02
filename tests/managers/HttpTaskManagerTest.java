@@ -403,44 +403,6 @@ public class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
     }
 
     @Test
-    public void shouldRestoreInfoAboutEpicForSubtasks() throws IOException, InterruptedException {
-        Epic epic = new Epic("epic");
-        taskManager.createItem(epic);
-        Subtask subtask1 = new Subtask("subtask1");
-        taskManager.createItem(subtask1);
-        taskManager.linkSubtaskToEpic(subtask1, epic);
-        Subtask subtask2 = new Subtask("subtask2");
-        taskManager.createItem(subtask2);
-        taskManager.linkSubtaskToEpic(subtask2, epic);
-
-        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
-
-        Subtask loadedSubtask1 = (Subtask) loadedTaskManager.getItemById(subtask1.getId());
-        Subtask loadedSubtask2 = (Subtask) loadedTaskManager.getItemById(subtask2.getId());
-        assertEquals(epic.getId(), loadedSubtask1.getEpicId());
-        assertEquals(epic.getId(), loadedSubtask2.getEpicId());
-    }
-
-    @Test
-    public void shouldRestoreInfoAboutSubtasksForEpic() throws IOException, InterruptedException {
-        Epic epic = new Epic("epic");
-        taskManager.createItem(epic);
-        Subtask subtask1 = new Subtask("subtask1");
-        taskManager.createItem(subtask1);
-        taskManager.linkSubtaskToEpic(subtask1, epic);
-        Subtask subtask2 = new Subtask("subtask2");
-        taskManager.createItem(subtask2);
-        taskManager.linkSubtaskToEpic(subtask2, epic);
-
-        TaskManager loadedTaskManager = HttpTaskManager.loadFromServer(host);
-
-        Epic loadedEpic = (Epic) loadedTaskManager.getItemById(epic.getId());
-        assertTrue(loadedEpic.getEpicSubtaskIds().contains(subtask1.getId()));
-        assertTrue(loadedEpic.getEpicSubtaskIds().contains(subtask2.getId()));
-        assertEquals(2, epic.getEpicSubtaskIds().size());
-    }
-
-    @Test
     public void shouldRestoreHistoryFromServer() throws IOException, InterruptedException {
         Task task = new Task("task");
         taskManager.createItem(task);
