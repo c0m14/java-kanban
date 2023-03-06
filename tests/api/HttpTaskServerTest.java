@@ -4,7 +4,7 @@ import adapters.DurationAdapter;
 import adapters.LocalDateTimeAdapter;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import exceptions.NoSuchTaskExists;
+import exceptions.NoSuchTaskExistsException;
 import managers.Managers;
 import managers.TaskManager;
 import model.Epic;
@@ -310,7 +310,7 @@ public class HttpTaskServerTest {
         taskManager.createItem(testEpic1);
         taskManager.createItem(testSubtask);
         taskManager.linkSubtaskToEpic(testSubtask, testEpic1);
-        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtasks/epic/?id=" + testEpic1.getId());
+        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtask/epic/?id=" + testEpic1.getId());
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(url)
@@ -331,7 +331,7 @@ public class HttpTaskServerTest {
     public void shouldReturn204IfSubtasksListForEpicIsEmpty() throws InterruptedException, IOException {
         Epic testEpic1 = new Epic("testEpic1", "Test description");
         taskManager.createItem(testEpic1);
-        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtasks/epic/?id=" + testEpic1.getId());
+        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtask/epic/?id=" + testEpic1.getId());
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(url)
@@ -350,7 +350,7 @@ public class HttpTaskServerTest {
         Subtask testSubtask1 = new Subtask("testSubtask1");
         taskManager.createItem(testSubtask1);
         taskManager.linkSubtaskToEpic(testSubtask1, testEpic1);
-        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtasks/epic/?id=" + testSubtask1.getId());
+        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtask/epic/?id=" + testSubtask1.getId());
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(url)
@@ -369,7 +369,7 @@ public class HttpTaskServerTest {
         Subtask testSubtask1 = new Subtask("testSubtask1");
         taskManager.createItem(testSubtask1);
         taskManager.linkSubtaskToEpic(testSubtask1, testEpic1);
-        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtasks/epic/?id=test");
+        URI url = URI.create("http://localhost:8080/api/v1/tasks/subtask/epic/?id=test");
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(url)
@@ -860,7 +860,7 @@ public class HttpTaskServerTest {
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа");
         Executable executable = () -> taskManager.getItemById(task.getId());
-        assertThrows(NoSuchTaskExists.class,
+        assertThrows(NoSuchTaskExistsException.class,
                 executable,
                 "Задача не удалена");
     }
@@ -894,7 +894,7 @@ public class HttpTaskServerTest {
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа");
         Executable executable = () -> taskManager.getItemById(subtask.getId());
-        assertThrows(NoSuchTaskExists.class,
+        assertThrows(NoSuchTaskExistsException.class,
                 executable,
                 "Задача не удалена");
     }
@@ -914,7 +914,7 @@ public class HttpTaskServerTest {
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа");
         Executable executable = () -> taskManager.getItemById(epic.getId());
-        assertThrows(NoSuchTaskExists.class,
+        assertThrows(NoSuchTaskExistsException.class,
                 executable,
                 "Задача не удалена");
     }
@@ -982,7 +982,7 @@ public class HttpTaskServerTest {
     }
 
     @Test
-    public void shouldReturn404IfSubtaskIdNotANumber() throws InterruptedException, IOException {
+    public void shouldReturn400IfSubtaskIdNotANumber() throws InterruptedException, IOException {
         Subtask subtask = new Subtask("subtask");
         taskManager.createItem(subtask);
         Epic epic = new Epic("epic");
@@ -999,11 +999,11 @@ public class HttpTaskServerTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(404, response.statusCode(), "Некорректный код ответа");
+        assertEquals(400, response.statusCode(), "Некорректный код ответа");
     }
 
     @Test
-    public void shouldReturn404IfEpicIdNotANumber() throws InterruptedException, IOException {
+    public void shouldReturn400IfEpicIdNotANumber() throws InterruptedException, IOException {
         Subtask subtask = new Subtask("subtask");
         taskManager.createItem(subtask);
         Epic epic = new Epic("epic");
@@ -1020,7 +1020,7 @@ public class HttpTaskServerTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(404, response.statusCode(), "Некорректный код ответа");
+        assertEquals(400, response.statusCode(), "Некорректный код ответа");
     }
 
     //тест на некорректный метод
