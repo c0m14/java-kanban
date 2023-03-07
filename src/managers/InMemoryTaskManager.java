@@ -1,6 +1,6 @@
 package managers;
 
-import exceptions.NoSuchTaskExists;
+import exceptions.NoSuchTaskExistsException;
 import exceptions.TaskTimeIntersectionException;
 import model.*;
 
@@ -18,15 +18,7 @@ public class InMemoryTaskManager implements TaskManager {
     public InMemoryTaskManager() {
         this.allItems = new HashMap<>();
         this.historyManager = Managers.getDefaultHistory();
-        this.prioritizedItems = new TreeSet<>((task1, task2) -> {
-            if (task1.getStartTime() == null) {
-                return 1;
-            } else if (task2.getStartTime() == null) {
-                return -1;
-            } else {
-                return task1.getStartTime().compareTo(task2.getStartTime());
-            }
-        });
+        this.prioritizedItems = new TreeSet<>(new TaskStartTimeComparator());
     }
 
     public InMemoryTaskManager(int idCounter,
@@ -106,10 +98,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateItem(Task anyItem, int id) throws NoSuchTaskExists {
+    public void updateItem(Task anyItem, int id) throws NoSuchTaskExistsException {
         HashMap<Integer, Task> items;
         if (getItemByIdWithoutSavingHistory(id) == null) {
-            throw new NoSuchTaskExists("Задача с указанным Id не существует");
+            throw new NoSuchTaskExistsException("Задача с указанным Id не существует");
         }
         Task itemToChange = getItemByIdWithoutSavingHistory(anyItem.getId());
         prioritizedItems.remove(itemToChange);
@@ -142,9 +134,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void removeItemById(int id) throws NoSuchTaskExists {
+    public void removeItemById(int id) throws NoSuchTaskExistsException {
         if (getItemByIdWithoutSavingHistory(id) == null) {
-            throw new NoSuchTaskExists("Нет задачи с таким id");
+            throw new NoSuchTaskExistsException("Нет задачи с таким id");
         }
         Task currItem = getItemByIdWithoutSavingHistory(id);
         if (currItem.getClass() == Subtask.class) {
@@ -208,16 +200,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getItemById(int id) throws NoSuchTaskExists {
+    public Task getItemById(int id) throws NoSuchTaskExistsException {
         if (getItemByIdWithoutSavingHistory(id) == null) {
-            throw new NoSuchTaskExists("Нет задачи с таким id");
+            throw new NoSuchTaskExistsException("Нет задачи с таким id");
         }
         Task item = getItemByIdWithoutSavingHistory(id);
         historyManager.add(item);
         return item;
     }
 
-    public Task getItemByIdWithoutSavingHistory(int id) throws NoSuchTaskExists {
+    public Task getItemByIdWithoutSavingHistory(int id) throws NoSuchTaskExistsException {
         Task item = null;
         for (HashMap<Integer, Task> hashmap : allItems.values()) {
             if (hashmap.get(id) != null) {

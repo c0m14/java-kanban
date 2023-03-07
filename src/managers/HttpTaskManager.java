@@ -9,7 +9,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import exceptions.IncorrectLoadFromServerRequestException;
 import exceptions.ManagerSaveException;
-import exceptions.NoSuchTaskExists;
+import exceptions.NoSuchTaskExistsException;
 import model.Epic;
 import model.ItemType;
 import model.Subtask;
@@ -174,7 +174,7 @@ public class HttpTaskManager extends FileBackedTaskManager {
     @Override
     public void removeItemById(int id) {
         if (getItemByIdWithoutSavingHistory(id) == null) {
-            throw new NoSuchTaskExists("Нет задачи с таким id");
+            throw new NoSuchTaskExistsException("Нет задачи с таким id");
         }
         ItemType itemType = super.getItemByIdWithoutSavingHistory(id).getItemType();
         super.removeItemById(id);

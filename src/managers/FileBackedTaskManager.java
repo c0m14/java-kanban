@@ -4,6 +4,7 @@ import exceptions.ManagerSaveException;
 import model.*;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
@@ -50,15 +52,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
         HashMap<Integer, Task> items;
-        TreeSet<Task> restoredPrioritizedItems = new TreeSet<>((task1, task2) -> {
-            if (task1.getStartTime() == null) {
-                return 1;
-            } else if (task2.getStartTime() == null) {
-                return -1;
-            } else {
-                return task1.getStartTime().compareTo(task2.getStartTime());
-            }
-        });
+        TreeSet<Task> restoredPrioritizedItems = new TreeSet<>(new TaskStartTimeComparator());
 
         HashMap<Integer, List<Integer>> epicsSubtasksIds = new HashMap<>();
         List<Integer> subtasksIdsForEpic;
@@ -157,6 +151,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         return restoredFileManager;
+    }
+
+    private List<Task> loadTasksFromFile(Path path) throws IOException {
+        List<Task> tasksFromFile = new ArrayList<>(); //временное хранилище всех items из файла
+
+        try (Stream<String> lines = Files.lines(path)) {
+            lines.filter(line -> line.contains("TASK") || line.contains("SUBTASK") || line.contains("EPIC"))
+                    .forEach(line -> tasksFromFile.add(fromString("line")));
+        }
+
+        return tasksFromFile;
     }
 
     private static String historyToString(HistoryManager historyManager) {
