@@ -3,7 +3,9 @@ package managers;
 import exceptions.ManagerSaveException;
 import model.*;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -22,10 +24,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private FileBackedTaskManager(int idCounter,
-                                 HashMap<ItemType, HashMap<Integer, Task>> allItems,
-                                 HistoryManager historyManager,
-                                 TreeSet<Task> prioritizedItems,
-                                 Path backupFilePath) {
+                                  HashMap<ItemType, HashMap<Integer, Task>> allItems,
+                                  HistoryManager historyManager,
+                                  TreeSet<Task> prioritizedItems,
+                                  Path backupFilePath) {
         super(idCounter, allItems, historyManager, prioritizedItems);
         this.backupFilePath = backupFilePath;
     }
@@ -81,7 +83,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
         return restoredFileManager;
     }
-    protected static int restoreIdCounter (HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems) {
+
+    protected static int restoreIdCounter(HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems) {
         OptionalInt id = restoredAllItems.values().stream()
                 .flatMap(hashmap -> hashmap.keySet().stream())
                 .mapToInt(Integer::intValue)
@@ -93,7 +96,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private  static List<Task> loadTasksFromFile(Path path) throws IOException {
+    private static List<Task> loadTasksFromFile(Path path) throws IOException {
         List<Task> tasksFromFile = new ArrayList<>();
 
         try (Stream<String> lines = Files.lines(path)) {
@@ -110,16 +113,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (Stream<String> lines = Files.lines(path)) {
             lines.skip(1)
                     .filter(line -> !line.contains("TASK")
-                                    && !line.contains("SUBTASK")
-                                    && !line.contains("EPIC")
-                    &&!line.equals(""))
+                            && !line.contains("SUBTASK")
+                            && !line.contains("EPIC")
+                            && !line.equals(""))
                     .forEach(historyLineBuilder::append);
         }
         return historyLineBuilder.toString();
     }
 
     private static HashMap<ItemType, HashMap<Integer, Task>> restoreAllItemsWithPriorities(List<Task> tasksFromFile,
-                                                                  TreeSet<Task> restoredPrioritizedItems) {
+                                                                                           TreeSet<Task> restoredPrioritizedItems) {
         HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
         HashMap<Integer, Task> items;
         for (Task item : tasksFromFile) {
