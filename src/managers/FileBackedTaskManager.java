@@ -9,10 +9,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -48,88 +45,108 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static FileBackedTaskManager loadFromFile(Path file) {
         List<Task> tasksFromFile = new ArrayList<>(); //временное хранилище всех items из файла
-        int restoredIdCounter = -1;
-
-        HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
-        HashMap<Integer, Task> items;
-        TreeSet<Task> restoredPrioritizedItems = new TreeSet<>(new TaskStartTimeComparator());
-
-        HashMap<Integer, List<Integer>> epicsSubtasksIds = new HashMap<>();
-        List<Integer> subtasksIdsForEpic;
-
         String historyIdsLine = "";
-        HistoryManager restoredHistoryManager = Managers.getDefaultHistory();
+        int restoredIdCounter;
+        HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems;
+        TreeSet<Task> restoredPrioritizedItems = new TreeSet<>(new TaskStartTimeComparator());
+        HistoryManager restoredHistoryManager;
 
         //вычитываем данные из файла
-        try (BufferedReader fileReader = new BufferedReader(new FileReader(file.toFile()))) {
-            while (fileReader.ready()) {
-                String line = fileReader.readLine();
-                if (line.contains("id")) {
-                    continue;
-                } else if (line.contains("TASK") || line.contains("SUBTASK") || line.contains("EPIC")) {
-                    tasksFromFile.add(fromString(line));
-                } else if (line.equals("")) {
-                    continue;
-                } else {
-                    historyIdsLine = line; //читаем пустую строку-разделитель
-                }
-            }
+        try {
+            tasksFromFile = loadTasksFromFile(file);
+            historyIdsLine = loadHistoryLineFromFile(file);
         } catch (IOException e) {
             System.out.println("Ошибка чтения файла");
         }
+        //Восстанавливаем структуру и список приоритетов
+        restoredAllItems = restoreAllItemsWithPriorities(tasksFromFile, restoredPrioritizedItems);
+        //Восстанавливаем подзадачи для эпиков
+        restoreSubtasksForEpics(restoredAllItems);
+        //Актуализируем idCounter
+        restoredIdCounter = restoredAllItems.values().stream()
+                .flatMap(hashmap -> hashmap.keySet().stream())
+                .mapToInt(Integer::intValue)
+                .max().getAsInt();
+        //Восстанавливаем HistoryManager
+        restoredHistoryManager = restoreHistoryManager(historyIdsLine, restoredAllItems);
+        //Конструируем FileBackedTaskManager
+        FileBackedTaskManager restoredFileManager = new FileBackedTaskManager(restoredIdCounter,
+                restoredAllItems,
+                restoredHistoryManager,
+                restoredPrioritizedItems,
+                file);
+        //Восстанавливаем startTime / duration / EndTime для Epic
+        if (restoredAllItems.get(ItemType.EPIC) != null) {
+            restoredAllItems.get(ItemType.EPIC).values().stream()
+                    .map(Epic.class::cast)
+                    .mapToInt(Epic::getId)
+                    .forEach(restoredFileManager::updateEpicStartTimeDurationEndTime);
+        }
+        return restoredFileManager;
+    }
 
-        //Восстанавливаем структуру items
-        for (Task task : tasksFromFile) {
-            if (task.getItemType().equals(ItemType.TASK)) {
-                if (restoredAllItems.get(ItemType.TASK) != null) {
-                    items = restoredAllItems.get(ItemType.TASK);
-                } else {
-                    items = new HashMap<>();
-                }
-                items.put(task.getId(), task);
-                restoredAllItems.put(ItemType.TASK, items);
-                restoredPrioritizedItems.add(task);
-            }
-            if (task.getItemType().equals(ItemType.SUBTASK)) {
-                if (restoredAllItems.get(ItemType.SUBTASK) != null) {
-                    items = restoredAllItems.get(ItemType.SUBTASK);
-                } else {
-                    items = new HashMap<>();
-                }
-                items.put(task.getId(), task);
-                restoredAllItems.put(ItemType.SUBTASK, items);
-                restoredPrioritizedItems.add(task);
+    private  static List<Task> loadTasksFromFile(Path path) throws IOException {
+        List<Task> tasksFromFile = new ArrayList<>();
 
-                int epicId = ((Subtask) task).getEpicId();
-                if (epicsSubtasksIds.get(epicId) == null) {
-                    subtasksIdsForEpic = new ArrayList<>();
-                } else {
-                    subtasksIdsForEpic = epicsSubtasksIds.get(epicId);
-                }
-                subtasksIdsForEpic.add(task.getId());
-                epicsSubtasksIds.put(epicId, subtasksIdsForEpic);
-            }
-            if (task.getItemType().equals(ItemType.EPIC)) {
-                if (restoredAllItems.get(ItemType.EPIC) != null) {
-                    items = restoredAllItems.get(ItemType.EPIC);
-                } else {
-                    items = new HashMap<>();
-                }
-                items.put(task.getId(), task);
-                restoredAllItems.put(ItemType.EPIC, items);
-            }
-            //Актуализируем idCounter
-            restoredIdCounter = Integer.max(task.getId(), restoredIdCounter);
+        try (Stream<String> lines = Files.lines(path)) {
+            lines.filter(line -> line.contains("TASK") || line.contains("SUBTASK") || line.contains("EPIC"))
+                    .forEach(line -> tasksFromFile.add(fromString(line)));
         }
 
-        //Восстанавливаем для Epic знание о своих Subtask
-        for (Integer epicId : epicsSubtasksIds.keySet()) {
-            ((Epic) restoredAllItems.get(ItemType.EPIC)
-                    .get(epicId))
-                    .loadEpicSubtasksIds(epicsSubtasksIds.get(epicId));
-        }
+        return tasksFromFile;
+    }
 
-        //Восстанавливаем историю
+    private static String loadHistoryLineFromFile(Path path) throws IOException {
+        StringBuilder historyLineBuilder = new StringBuilder();
+
+        try (Stream<String> lines = Files.lines(path)) {
+            lines.skip(1)
+                    .filter(line -> !line.contains("TASK")
+                                    && !line.contains("SUBTASK")
+                                    && !line.contains("EPIC")
+                    &&!line.equals(""))
+                    .forEach(historyLineBuilder::append);
+        }
+        return historyLineBuilder.toString();
+    }
+
+    private static HashMap<ItemType, HashMap<Integer, Task>> restoreAllItemsWithPriorities(List<Task> tasksFromFile,
+                                                                  TreeSet<Task> restoredPrioritizedItems) {
+        HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
+        HashMap<Integer, Task> items;
+        for (Task item : tasksFromFile) {
+            ItemType currentItemType = item.getItemType();
+
+            //Восстанавливаем структуру allItems
+            if (restoredAllItems.get(currentItemType) != null) {
+                items = restoredAllItems.get(currentItemType);
+            } else {
+                items = new HashMap<>();
+            }
+            items.put(item.getId(), item);
+            restoredAllItems.put(currentItemType, items);
+            //восстанавливаем prioritizedItems
+            restoredPrioritizedItems.add(item);
+        }
+        return restoredAllItems;
+    }
+
+    private static void restoreSubtasksForEpics(HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems) {
+        if (restoredAllItems.get(ItemType.SUBTASK) == null) {
+            return;
+        }
+        for (Task subtask : restoredAllItems.get(ItemType.SUBTASK).values()) {
+            int epicId = ((Subtask) subtask).getEpicId();
+            restoredAllItems.get(ItemType.EPIC).values().stream()
+                    .map(Epic.class::cast)
+                    .forEach(epic -> epic.addSubtask((Subtask) subtask));
+        }
+    }
+
+    private static HistoryManager restoreHistoryManager(String historyIdsLine,
+                                                        HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems) {
+        HistoryManager restoredHistoryManager = Managers.getDefaultHistory();
+
         String[] historyIdsFromLine = historyIdsLine.split(",");
         if (!historyIdsLine.equals("")) {
             for (String id : historyIdsFromLine) {
@@ -138,30 +155,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
         }
-
-        FileBackedTaskManager restoredFileManager = new FileBackedTaskManager(restoredIdCounter,
-                restoredAllItems,
-                restoredHistoryManager,
-                restoredPrioritizedItems,
-                file);
-
-        //Восстанавливаем startTime / duration / EndTime для Epic
-        for (Integer epicId : epicsSubtasksIds.keySet()) {
-            restoredFileManager.updateEpicStartTimeDurationEndTime(epicId);
-        }
-
-        return restoredFileManager;
-    }
-
-    private List<Task> loadTasksFromFile(Path path) throws IOException {
-        List<Task> tasksFromFile = new ArrayList<>(); //временное хранилище всех items из файла
-
-        try (Stream<String> lines = Files.lines(path)) {
-            lines.filter(line -> line.contains("TASK") || line.contains("SUBTASK") || line.contains("EPIC"))
-                    .forEach(line -> tasksFromFile.add(fromString("line")));
-        }
-
-        return tasksFromFile;
+        return restoredHistoryManager;
     }
 
     private static String historyToString(HistoryManager historyManager) {
@@ -229,8 +223,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     "name",
                     "status",
                     "description",
-                    "duration",
                     "startTime",
+                    "duration",
                     "epic\n");
 
             fileWriter.write(header);

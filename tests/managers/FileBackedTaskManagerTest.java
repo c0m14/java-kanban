@@ -71,8 +71,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         assertEquals(header[2], "name", "Неверное расположение полей в файле");
         assertEquals(header[3], "status", "Неверное расположение полей в файле");
         assertEquals(header[4], "description", "Неверное расположение полей в файле");
-        assertEquals(header[5], "duration", "Неверное расположение полей в файле");
-        assertEquals(header[6], "startTime", "Неверное расположение полей в файле");
+        assertEquals(header[5], "startTime", "Неверное расположение полей в файле");
+        assertEquals(header[6], "duration", "Неверное расположение полей в файле");
         assertEquals(header[7], "epic", "Неверное расположение полей в файле");
     }
 
