@@ -136,7 +136,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             return;
         }
         for (Task subtask : restoredAllItems.get(ItemType.SUBTASK).values()) {
-            int epicId = ((Subtask) subtask).getEpicId();
             restoredAllItems.get(ItemType.EPIC).values().stream()
                     .map(Epic.class::cast)
                     .forEach(epic -> epic.addSubtask((Subtask) subtask));
