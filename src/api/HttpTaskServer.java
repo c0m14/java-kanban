@@ -153,7 +153,7 @@ public class HttpTaskServer {
                         "Неверный формат параметров",
                         400);
             }
-        }  else if (Pattern.matches("^/api/v1/tasks/history/$", path)) {
+        } else if (Pattern.matches("^/api/v1/tasks/history/$", path)) {
             sendHistory(httpExchange);
         } else if (Pattern.matches("^/api/v1/tasks/priorities/$", path)) {
             sendPriorityList(httpExchange);
@@ -183,14 +183,14 @@ public class HttpTaskServer {
         Task requestedEpic = ((InMemoryTaskManager) taskManager)
                 .getItemByIdWithoutSavingHistory(epicId);
         if (requestedEpic != null && requestedEpic.getItemType() == ItemType.EPIC) {
-            try {
-                ArrayList<Subtask> epicSubtasks = taskManager
-                        .getEpicSubtasks(epicId);
+            ArrayList<Subtask> epicSubtasks = taskManager
+                    .getEpicSubtasks(epicId);
+            if (epicSubtasks.size() > 0) {
                 String response = gson.toJson(epicSubtasks);
                 writeResponse(httpExchange,
                         response,
                         200);
-            } catch (NullPointerException e) {
+            } else {
                 writeResponse(httpExchange,
                         "К эпику не привязаны подзадачи",
                         204);
@@ -390,12 +390,12 @@ public class HttpTaskServer {
 
         if (Pattern.matches("^/api/v1/tasks/$", path)) {
             if (Pattern.matches("^id=\\d+$", query)) {
-            int itemId = getIdFromQuery(query);
+                int itemId = getIdFromQuery(query);
                 try {
                     taskManager.removeItemById(itemId);
                     writeResponse(httpExchange,
                             "",
-                                200);
+                            200);
                 } catch (NoSuchTaskExistsException e) {
                     writeResponse(httpExchange,
                             "Задача с id " + itemId + " не найдена",
