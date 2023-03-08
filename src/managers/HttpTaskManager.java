@@ -10,10 +10,7 @@ import com.google.gson.reflect.TypeToken;
 import exceptions.IncorrectLoadFromServerRequestException;
 import exceptions.ManagerSaveException;
 import exceptions.NoSuchTaskExistsException;
-import model.Epic;
-import model.ItemType;
-import model.Subtask;
-import model.Task;
+import model.*;
 import server.KVTaskClient;
 
 import java.io.IOException;
@@ -54,100 +51,105 @@ public class HttpTaskManager extends FileBackedTaskManager {
 
     public static HttpTaskManager loadFromServer(String host) throws InterruptedException, IOException {
         HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems = new HashMap<>();
-        HistoryManager restoredHistoryManager = Managers.getDefaultHistory();
-        TreeSet<Task> restoredPrioritizedItems = new TreeSet<>((task1, task2) -> {
-            if (task1.getStartTime() == null) {
-                return 1;
-            } else if (task2.getStartTime() == null) {
-                return -1;
-            } else {
-                return task1.getStartTime().compareTo(task2.getStartTime());
-            }
-        });
-        int restoredIdCounter = -1;
+        HistoryManager restoredHistoryManager;
+        TreeSet<Task> restoredPrioritizedItems = new TreeSet<>(new TaskStartTimeComparator());
+        int restoredIdCounter;
         KVTaskClient client = new KVTaskClient(host);
-        Type taskType = new TypeToken<Task>() {
-        }.getType();
-        Type subtaskType = new TypeToken<Subtask>() {
-        }.getType();
-        Type epicType = new TypeToken<Epic>() {
-        }.getType();
 
         //Восстанавливаем задачи
-        try {
-            HashMap<Integer, Task> restoredTasks = new HashMap<>();
-            JsonElement loadedTasksJson = JsonParser.parseString(client.load(KVTaskClient.Key.TASKS));
-            for (JsonElement jsonTask : loadedTasksJson.getAsJsonArray()) {
-                Task currentTask = gson.fromJson(jsonTask, taskType);
-                restoredTasks.put(currentTask.getId(), currentTask);
-                restoredPrioritizedItems.add(currentTask);
-
-            }
-            restoredAllItems.put(ItemType.TASK, restoredTasks);
-        } catch (IncorrectLoadFromServerRequestException e) {
-            //При загрузке менеджера с сервера игнорируем возможное отсутствие полей
-        }
-
-
+        restoreItemsByTypeWithPriorities(restoredPrioritizedItems,
+                restoredAllItems,
+                client,
+                ItemType.TASK);
         //Восстанавливаем эпики
-        try {
-            HashMap<Integer, Task> restoredEpics = new HashMap<>();
-            JsonElement loadedEpicsJson = JsonParser.parseString(client.load(KVTaskClient.Key.EPICS));
-            for (JsonElement jsonEpic : loadedEpicsJson.getAsJsonArray()) {
-                Task currentEpic = gson.fromJson(jsonEpic, epicType);
-                restoredEpics.put(currentEpic.getId(), currentEpic);
-            }
-            restoredAllItems.put(ItemType.EPIC, restoredEpics);
-        } catch (IncorrectLoadFromServerRequestException e) {
-            //При загрузке менеджера с сервера игнорируем возможное отсутствие полей
-        }
-
+        restoreItemsByTypeWithPriorities(restoredPrioritizedItems,
+                restoredAllItems,
+                client,
+                ItemType.EPIC);
         //Восстанавливаем подзадачи
-        try {
-            HashMap<Integer, Task> restoredSubtasks = new HashMap<>();
-            JsonElement loadedSubtasksJson = JsonParser.parseString(client.load(KVTaskClient.Key.SUBTASKS));
-            for (JsonElement jsonSubtask : loadedSubtasksJson.getAsJsonArray()) {
-                Task currentSubtask = gson.fromJson(jsonSubtask, subtaskType);
-                restoredSubtasks.put(currentSubtask.getId(), currentSubtask);
-                restoredPrioritizedItems.add(currentSubtask);
-            }
-            restoredAllItems.put(ItemType.SUBTASK, restoredSubtasks);
-        } catch (IncorrectLoadFromServerRequestException e) {
-            //При загрузке менеджера с сервера игнорируем возможное отсутствие полей
-        }
-
-
+        restoreItemsByTypeWithPriorities(restoredPrioritizedItems,
+                restoredAllItems,
+                client,
+                ItemType.SUBTASK);
         //Восстанавливаем idCounter
-        if (!restoredAllItems.isEmpty()) {
-            for (HashMap<Integer, Task> value : restoredAllItems.values()) {
-                for (Integer id : value.keySet()) {
-                    restoredIdCounter = Integer.max(id, restoredIdCounter);
-                }
-            }
-        }
-
+        restoredIdCounter = restoreIdCounter(restoredAllItems);
         //Восстанавливаем историю
-        try {
-            JsonElement historyItemsJson = JsonParser.parseString(client.load(KVTaskClient.Key.HISTORY));
-            for (JsonElement item : historyItemsJson.getAsJsonArray()) {
-                String itemType = item.getAsJsonObject().get("itemType").getAsString();
-                if (itemType.equals(ItemType.TASK.toString())) {
-                    restoredHistoryManager.add(gson.fromJson(item, taskType));
-                } else if (itemType.equals(ItemType.SUBTASK.toString())) {
-                    restoredHistoryManager.add(gson.fromJson(item, subtaskType));
-                } else if (itemType.equals(ItemType.EPIC.toString())) {
-                    restoredHistoryManager.add(gson.fromJson(item, epicType));
-                }
-            }
-        } catch (IncorrectLoadFromServerRequestException e) {
-            //При загрузке менеджера с сервера игнорируем возможное отсутствие полей
-        }
+        restoredHistoryManager = restoreHistoryFromJson(client);
 
         return new HttpTaskManager(restoredIdCounter,
                 restoredAllItems,
                 restoredHistoryManager,
                 restoredPrioritizedItems,
                 host);
+    }
+
+    private static void restoreItemsByTypeWithPriorities
+            (TreeSet<Task> restoredPrioritizedItems,
+             HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems,
+             KVTaskClient client,
+             ItemType itemType) throws IOException, InterruptedException {
+
+        try {
+            HashMap<Integer, Task> restoredItems = new HashMap<>();
+            JsonElement loadedTasksJson = JsonParser.parseString(client.load(getKVTaskClientKeyByItemType(itemType)));
+            for (JsonElement jsonTask : loadedTasksJson.getAsJsonArray()) {
+                Task currentTask = gson.fromJson(jsonTask, getJsonParseTypeByItemType(itemType));
+                restoredItems.put(currentTask.getId(), currentTask);
+                if (itemType.equals(ItemType.TASK) || itemType.equals(ItemType.SUBTASK)) {
+                    restoredPrioritizedItems.add(currentTask);
+                }
+            }
+            restoredAllItems.put(itemType, restoredItems);
+        } catch (IncorrectLoadFromServerRequestException e) {
+            //При загрузке менеджера с сервера игнорируем возможное отсутствие полей
+        }
+    }
+
+    private static KVTaskClient.Key getKVTaskClientKeyByItemType(ItemType itemType) {
+        switch (itemType) {
+            case TASK:
+                return KVTaskClient.Key.TASKS;
+            case SUBTASK:
+                return KVTaskClient.Key.SUBTASKS;
+            case EPIC:
+                return KVTaskClient.Key.EPICS;
+        }
+        return null;
+    }
+
+    private static Type getJsonParseTypeByItemType(ItemType itemType) {
+        switch (itemType) {
+            case TASK:
+                return new TypeToken<Task>() {
+                }.getType();
+            case SUBTASK:
+                return new TypeToken<Subtask>() {
+                }.getType();
+            case EPIC:
+                return new TypeToken<Epic>() {
+                }.getType();
+        }
+        return null;
+    }
+
+    private static HistoryManager restoreHistoryFromJson(KVTaskClient client) throws IOException, InterruptedException {
+        HistoryManager restoredHistoryManager = Managers.getDefaultHistory();
+        try {
+            JsonElement historyItemsJson = JsonParser.parseString(client.load(KVTaskClient.Key.HISTORY));
+            for (JsonElement item : historyItemsJson.getAsJsonArray()) {
+                String itemType = item.getAsJsonObject().get("itemType").getAsString();
+                if (itemType.equals(ItemType.TASK.toString())) {
+                    restoredHistoryManager.add(gson.fromJson(item, getJsonParseTypeByItemType(ItemType.TASK)));
+                } else if (itemType.equals(ItemType.SUBTASK.toString())) {
+                    restoredHistoryManager.add(gson.fromJson(item, getJsonParseTypeByItemType(ItemType.SUBTASK)));
+                } else if (itemType.equals(ItemType.EPIC.toString())) {
+                    restoredHistoryManager.add(gson.fromJson(item, getJsonParseTypeByItemType(ItemType.EPIC)));
+                }
+            }
+        } catch (IncorrectLoadFromServerRequestException e) {
+            //При загрузке менеджера с сервера игнорируем возможное отсутствие полей
+        }
+        return restoredHistoryManager;
     }
 
     @Override
