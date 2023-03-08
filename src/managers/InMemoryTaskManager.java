@@ -38,42 +38,21 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int createItem(Task anyItem) {
         HashMap<Integer, Task> items;
-        if (anyItem.getClass() == Task.class) {
-            checkIntervalAvailability(anyItem);
-            if (allItems.get(ItemType.TASK) != null) {
-                items = allItems.get(ItemType.TASK);
-            } else {
-                items = new HashMap<>();
-            }
-            items.put(idCounter, anyItem);
-            allItems.put(ItemType.TASK, items);
-            prioritizedItems.add(anyItem);
-        }
-        if (anyItem.getClass() == Subtask.class) {
-            checkIntervalAvailability(anyItem);
-            if (allItems.get(ItemType.SUBTASK) != null) {
-                items = allItems.get(ItemType.SUBTASK);
-            } else {
-                items = new HashMap<>();
-            }
-            items.put(idCounter, anyItem);
-            allItems.put(ItemType.SUBTASK, items);
-            checkIntervalAvailability(anyItem);
-            prioritizedItems.add(anyItem);
+        ItemType anyItemType = anyItem.getItemType();
+        boolean isItemTaskOrSubtask = anyItemType.equals(ItemType.TASK) || anyItemType.equals(ItemType.SUBTASK);
 
-            if (((Subtask) anyItem).getEpicId() != 0) {
-                updateEpicStatus(((Subtask) anyItem).getEpicId());
-                updateEpicStartTimeDurationEndTime(((Subtask) anyItem).getEpicId());
-            }
+        if (isItemTaskOrSubtask) {
+            checkIntervalAvailability(anyItem);
         }
-        if (anyItem.getClass() == Epic.class) {
-            if (allItems.get(ItemType.EPIC) != null) {
-                items = allItems.get(ItemType.EPIC);
-            } else {
-                items = new HashMap<>();
-            }
-            items.put(idCounter, anyItem);
-            allItems.put(ItemType.EPIC, items);
+        items = allItems.getOrDefault(anyItemType, new HashMap<>());
+        items.put(idCounter, anyItem);
+        allItems.put(anyItemType, items);
+        if (isItemTaskOrSubtask) {
+            prioritizedItems.add(anyItem);
+        }
+        if (anyItemType.equals(ItemType.SUBTASK) && ((Subtask) anyItem).getEpicId() != 0) {
+            updateEpicStatus(((Subtask) anyItem).getEpicId());
+            updateEpicStartTimeDurationEndTime(((Subtask) anyItem).getEpicId());
         }
         anyItem.setId(idCounter);
         return idCounter++;
@@ -90,45 +69,30 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Task> getAllItemsByType(ItemType itemType) {
-        ArrayList<Task> itemsByChosenType = new ArrayList<>();
-        for (Task item : allItems.get(itemType).values()) {
-            itemsByChosenType.add(item);
-        }
-        return itemsByChosenType;
+        return new ArrayList<>(allItems.get(itemType).values());
     }
 
     @Override
     public void updateItem(Task anyItem, int id) throws NoSuchTaskExistsException {
         HashMap<Integer, Task> items;
+        ItemType anyItemType = anyItem.getItemType();
+        boolean isItemTaskOrSubtask = anyItemType.equals(ItemType.TASK) || anyItemType.equals(ItemType.SUBTASK);
         if (getItemByIdWithoutSavingHistory(id) == null) {
             throw new NoSuchTaskExistsException("Задача с указанным Id не существует");
         }
         Task itemToChange = getItemByIdWithoutSavingHistory(anyItem.getId());
         prioritizedItems.remove(itemToChange);
-        if (anyItem.getClass() == Task.class) {
+
+        if (isItemTaskOrSubtask) {
             checkIntervalAvailability(anyItem);
-            items = allItems.get(ItemType.TASK);
-            items.put(id, anyItem);
-            allItems.put(ItemType.TASK, items);
-            prioritizedItems.add(anyItem);
-        }
-        if (anyItem.getClass() == Subtask.class) {
-            checkIntervalAvailability(anyItem);
-            if (((Subtask) anyItem).getEpicId() != 0) {
+            if (anyItemType.equals(ItemType.SUBTASK) && ((Subtask) anyItem).getEpicId() != 0) {
                 int epicId = ((Subtask) anyItem).getEpicId();
                 updateEpicStatus(epicId);
                 updateEpicStartTimeDurationEndTime(epicId);
             }
-            items = allItems.get(ItemType.SUBTASK);
+            items = allItems.get(anyItemType);
             items.put(id, anyItem);
-            allItems.put(ItemType.SUBTASK, items);
-            prioritizedItems.add(anyItem);
-        }
-        if (anyItem.getClass() == Epic.class) {
-            items = allItems.get(ItemType.EPIC);
-            items.put(id, anyItem);
-            allItems.put(ItemType.EPIC, items);
-            prioritizedItems.remove(anyItem);
+            allItems.put(anyItemType, items);
             prioritizedItems.add(anyItem);
         }
     }
@@ -148,8 +112,6 @@ public class InMemoryTaskManager implements TaskManager {
                 updateEpicStatus(currEpic.getId());
                 updateEpicStartTimeDurationEndTime(currEpic.getId());
             }
-            historyManager.remove(id);
-            allItems.get(ItemType.SUBTASK).remove(id);
         } else if (currItem.getClass() == Epic.class) {
             Epic currEpic = (Epic) currItem;
             List<Integer> currEpicSubtasksIds = new ArrayList<>(currEpic.getEpicSubtaskIds());
@@ -158,12 +120,9 @@ public class InMemoryTaskManager implements TaskManager {
                     removeItemById(epicSubtaskId);
                 }
             }
-            historyManager.remove(id);
-            allItems.get(ItemType.EPIC).remove(id);
-        } else {
-            historyManager.remove(id);
-            allItems.get(ItemType.TASK).remove(id);
         }
+        historyManager.remove(id);
+        allItems.get(currItem.getItemType()).remove(id);
         prioritizedItems.remove(currItem);
     }
 
@@ -284,9 +243,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected ArrayList<Task> getAllItemsOfAllTypes() {
         ArrayList<Task> tasks = new ArrayList<>();
         for (HashMap<Integer, Task> entrySet : allItems.values()) {
-            for (Task task : entrySet.values()) {
-                tasks.add(task);
-            }
+            tasks.addAll(entrySet.values());
         }
         return tasks;
     }
