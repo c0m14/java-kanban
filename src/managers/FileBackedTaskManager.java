@@ -63,10 +63,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         //Восстанавливаем подзадачи для эпиков
         restoreSubtasksForEpics(restoredAllItems);
         //Актуализируем idCounter
-        restoredIdCounter = restoredAllItems.values().stream()
-                .flatMap(hashmap -> hashmap.keySet().stream())
-                .mapToInt(Integer::intValue)
-                .max().getAsInt();
+        restoredIdCounter = restoreIdCounter(restoredAllItems);
         //Восстанавливаем HistoryManager
         restoredHistoryManager = restoreHistoryManager(historyIdsLine, restoredAllItems);
         //Конструируем FileBackedTaskManager
@@ -83,6 +80,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     .forEach(restoredFileManager::updateEpicStartTimeDurationEndTime);
         }
         return restoredFileManager;
+    }
+    protected static int restoreIdCounter (HashMap<ItemType, HashMap<Integer, Task>> restoredAllItems) {
+        OptionalInt id = restoredAllItems.values().stream()
+                .flatMap(hashmap -> hashmap.keySet().stream())
+                .mapToInt(Integer::intValue)
+                .max();
+        if (id.isPresent()) {
+            return id.getAsInt();
+        } else {
+            return 1;
+        }
     }
 
     private  static List<Task> loadTasksFromFile(Path path) throws IOException {
