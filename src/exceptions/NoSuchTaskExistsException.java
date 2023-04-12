@@ -1,8 +1,8 @@
 package exceptions;
 
-public class NoSuchTaskExists extends RuntimeException {
+public class NoSuchTaskExistsException extends RuntimeException {
 
-    public NoSuchTaskExists(String message) {
+    public NoSuchTaskExistsException(String message) {
         super(message);
     }
 }

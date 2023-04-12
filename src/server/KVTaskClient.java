@@ -20,13 +20,6 @@ public class KVTaskClient {
     public KVTaskClient(String host) throws InterruptedException, IOException {
         client = HttpClient.newHttpClient();
         this.host = host;
- /*       URI url = URI.create(host + registerUrl);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .GET()
-                .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        this.API_TOKEN = response.body();*/
         registerOnServer();
     }
 

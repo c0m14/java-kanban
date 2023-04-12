@@ -1,6 +1,6 @@
 package managers;
 
-import exceptions.NoSuchTaskExists;
+import exceptions.NoSuchTaskExistsException;
 import exceptions.TaskTimeIntersectionException;
 import model.*;
 import org.junit.jupiter.api.Assertions;
@@ -324,7 +324,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         Executable executable = () -> taskManager.updateItem(new Task("Новая задача"), 1);
 
-        assertThrows(NoSuchTaskExists.class,
+        assertThrows(NoSuchTaskExistsException.class,
                 executable,
                 "Обновлена задача с несуществующим Id");
     }
@@ -407,7 +407,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Executable executable = () -> taskManager.removeItemById(2);
 
         //Проверка
-        assertThrows(NoSuchTaskExists.class,
+        assertThrows(NoSuchTaskExistsException.class,
                 executable,
                 "Допуск удаления задачи с некорректным id");
     }
